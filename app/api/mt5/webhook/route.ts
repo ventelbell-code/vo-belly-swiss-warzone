@@ -1,322 +1,208 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
-// Tipos para las operaciones del EA
-interface MT5Operation {
-  ticket: number
-  symbol: string
-  type: "BUY" | "SELL"
-  lots: number
-  open_price: number
-  close_price: number
-  profit: number
-  commission: number
-  swap: number
-  open_time: string
-  close_time: string
-  magic_number?: number
-  comment?: string
-}
-
-interface MT5WebhookPayload {
-  action: "operation_closed" | "heartbeat" | "status_update" | "sync_operations"
-  api_key: string
-  account_id: number
+// Generic MT5 payload - multi-symbol support
+interface MT5Payload {
+  // Required
+  action: "heartbeat" | "trade_update" | "operation_closed" | "ping"
+  account_id: string | number
+  
+  // Optional - sent with heartbeat/trade_update
   broker?: string
   balance?: number
   equity?: number
-  operations?: MT5Operation[]
-  operation?: MT5Operation
-  timestamp: string
+  profit?: number
+  
+  // Optional - sent with operation_closed
+  bot_id?: string
+  symbol?: string
+  side?: "BUY" | "SELL"
+  ticket?: number
+  lots?: number
+  open_price?: number
+  close_price?: number
+  trade_profit?: number
+  
+  // Timestamp
+  timestamp?: string
 }
 
-// Validar API key y obtener cuenta MT5
-async function validateApiKey(supabase: ReturnType<typeof createClient>, apiKey: string, accountId: number) {
-  const { data: account, error } = await supabase
-    .from("mt5_accounts")
-    .select("*, clients(*)")
-    .eq("api_key", apiKey)
-    .eq("account_id", accountId)
-    .eq("is_active", true)
-    .single()
-
-  if (error || !account) {
-    return { valid: false, account: null, client: null }
-  }
-
-  return { valid: true, account, client: account.clients }
-}
-
-// Calcular tipo de operacion basado en profit y duracion
-function getOperationType(profit: number, durationMinutes: number): string {
-  if (durationMinutes < 5) return "Scalp"
-  if (profit > 50) return "Expansion"
-  return "Swing"
-}
-
-// POST - Recibir datos del EA
+// POST - Receive MT5 EA data
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const payload: MT5WebhookPayload = await request.json()
-
-    // Validar campos requeridos
-    if (!payload.api_key || !payload.account_id || !payload.action) {
+    
+    // Parse body
+    let payload: MT5Payload
+    try {
+      payload = await request.json()
+    } catch {
+      console.log("[v0] Invalid JSON received")
       return NextResponse.json(
-        { success: false, error: "Missing required fields: api_key, account_id, action" },
+        { success: false, error: "Invalid JSON" },
         { status: 400 }
       )
     }
 
-    // Validar API key
-    const { valid, account, client } = await validateApiKey(supabase, payload.api_key, payload.account_id)
-    if (!valid || !account || !client) {
+    // Log received payload for debugging
+    console.log("[v0] MT5 Webhook received:", JSON.stringify(payload))
+
+    // Validate required field
+    if (!payload.account_id) {
       return NextResponse.json(
-        { success: false, error: "Invalid API key or account" },
-        { status: 401 }
+        { success: false, error: "Missing required field: account_id" },
+        { status: 400 }
       )
     }
 
-    // Verificar si el cliente tiene el servicio activo
-    const { data: systemState } = await supabase
-      .from("system_state")
-      .select("*")
-      .eq("client_id", client.id)
-      .single()
-
-    const isServiceActive = systemState?.is_active ?? true
+    const accountId = String(payload.account_id)
+    const now = new Date().toISOString()
 
     switch (payload.action) {
-      case "heartbeat": {
-        // Actualizar ultimo contacto de la cuenta MT5
-        await supabase
-          .from("mt5_accounts")
-          .update({
-            last_sync: new Date().toISOString(),
-            balance: payload.balance,
-            equity: payload.equity,
-          })
-          .eq("id", account.id)
-
-        // Registrar actividad
-        await supabase.from("activity_log").insert({
-          client_id: client.id,
-          action: "heartbeat",
-          details: { account_id: payload.account_id, balance: payload.balance, equity: payload.equity },
-        })
-
+      case "ping": {
+        // Simple ping - just confirm the endpoint is alive
         return NextResponse.json({
           success: true,
-          service_active: isServiceActive,
-          message: "Heartbeat received",
+          message: "pong",
+          timestamp: now,
         })
       }
 
-      case "operation_closed": {
-        if (!payload.operation) {
-          return NextResponse.json(
-            { success: false, error: "Missing operation data" },
-            { status: 400 }
+      case "heartbeat":
+      case "trade_update": {
+        // Upsert into trades table (the one BotConnectionStatus reads)
+        const { error: upsertError } = await supabase
+          .from("trades")
+          .upsert(
+            {
+              account_id: accountId,
+              broker: payload.broker || "Deriv",
+              balance: payload.balance ?? 0,
+              equity: payload.equity ?? 0,
+              profit: payload.profit ?? 0,
+              updated_at: now,
+            },
+            { onConflict: "account_id" }
           )
-        }
 
-        const op = payload.operation
-        const openTime = new Date(op.open_time)
-        const closeTime = new Date(op.close_time)
-        const durationMinutes = (closeTime.getTime() - openTime.getTime()) / 60000
-
-        // Verificar si ya existe esta operacion (por ticket)
-        const { data: existingOp } = await supabase
-          .from("operations")
-          .select("id")
-          .eq("mt5_ticket", op.ticket)
-          .eq("mt5_account_id", account.id)
-          .single()
-
-        if (existingOp) {
-          return NextResponse.json({
-            success: true,
-            message: "Operation already recorded",
-            operation_id: existingOp.id,
-          })
-        }
-
-        // Calcular porcentaje basado en balance
-        const percentage = payload.balance ? (op.profit / payload.balance) * 100 : 0
-
-        // Insertar operacion
-        const { data: newOp, error: insertError } = await supabase
-          .from("operations")
-          .insert({
-            client_id: client.id,
-            mt5_account_id: account.id,
-            mt5_ticket: op.ticket,
-            asset: op.symbol,
-            asset_type: "Sintetico",
-            op_type: getOperationType(op.profit, durationMinutes),
-            direction: op.type,
-            lots: op.lots,
-            open_price: op.open_price,
-            close_price: op.close_price,
-            profit: op.profit,
-            percentage,
-            commission: op.commission,
-            swap: op.swap,
-            open_time: op.open_time,
-            close_time: op.close_time,
-            duration_minutes: Math.round(durationMinutes),
-            magic_number: op.magic_number,
-            comment: op.comment,
-          })
-          .select()
-          .single()
-
-        if (insertError) {
-          console.error("Error inserting operation:", insertError)
+        if (upsertError) {
+          console.log("[v0] Error upserting trade:", upsertError)
           return NextResponse.json(
-            { success: false, error: "Failed to record operation" },
+            { success: false, error: "Database error" },
             { status: 500 }
           )
         }
 
-        // Actualizar balance de la cuenta MT5
+        // Also upsert into accounts table for backup
         await supabase
-          .from("mt5_accounts")
-          .update({
+          .from("accounts")
+          .upsert(
+            {
+              account_id: accountId,
+              broker: payload.broker || "Deriv",
+              balance: payload.balance ?? 0,
+              equity: payload.equity ?? 0,
+              profit: payload.profit ?? 0,
+              updated_at: now,
+            },
+            { onConflict: "account_id" }
+          )
+
+        // Log activity
+        await supabase.from("activity_log").insert({
+          action: payload.action,
+          activity_type: "bot_heartbeat",
+          description: `Bot heartbeat from account ${accountId}`,
+          details: {
+            account_id: accountId,
+            broker: payload.broker,
             balance: payload.balance,
             equity: payload.equity,
-            last_sync: new Date().toISOString(),
-          })
-          .eq("id", account.id)
+            profit: payload.profit,
+          },
+        })
 
-        // Registrar actividad
+        return NextResponse.json({
+          success: true,
+          message: "Heartbeat recorded",
+          timestamp: now,
+        })
+      }
+
+      case "operation_closed": {
+        // Record closed operation
+        console.log("[v0] Operation closed:", payload)
+
+        // Update trades table with latest balance/equity
+        if (payload.balance !== undefined) {
+          await supabase
+            .from("trades")
+            .upsert(
+              {
+                account_id: accountId,
+                broker: payload.broker || "Deriv",
+                balance: payload.balance ?? 0,
+                equity: payload.equity ?? 0,
+                profit: payload.profit ?? 0,
+                updated_at: now,
+              },
+              { onConflict: "account_id" }
+            )
+        }
+
+        // Log activity
         await supabase.from("activity_log").insert({
-          client_id: client.id,
           action: "operation_closed",
+          activity_type: "trade",
+          description: `Trade closed: ${payload.symbol} ${payload.side}`,
           details: {
-            ticket: op.ticket,
-            symbol: op.symbol,
-            profit: op.profit,
-            type: op.type,
+            account_id: accountId,
+            bot_id: payload.bot_id,
+            symbol: payload.symbol,
+            side: payload.side,
+            ticket: payload.ticket,
+            profit: payload.trade_profit,
+            lots: payload.lots,
           },
         })
 
         return NextResponse.json({
           success: true,
           message: "Operation recorded",
-          operation_id: newOp.id,
-          service_active: isServiceActive,
+          timestamp: now,
         })
       }
 
-      case "sync_operations": {
-        if (!payload.operations || !Array.isArray(payload.operations)) {
-          return NextResponse.json(
-            { success: false, error: "Missing operations array" },
-            { status: 400 }
-          )
+      default: {
+        // Unknown action but still valid POST - accept it
+        console.log("[v0] Unknown action:", payload.action)
+        
+        // Update trades anyway if we have balance data
+        if (payload.balance !== undefined) {
+          await supabase
+            .from("trades")
+            .upsert(
+              {
+                account_id: accountId,
+                broker: payload.broker || "Deriv",
+                balance: payload.balance ?? 0,
+                equity: payload.equity ?? 0,
+                profit: payload.profit ?? 0,
+                updated_at: now,
+              },
+              { onConflict: "account_id" }
+            )
         }
-
-        let synced = 0
-        let skipped = 0
-
-        for (const op of payload.operations) {
-          // Verificar si ya existe
-          const { data: existingOp } = await supabase
-            .from("operations")
-            .select("id")
-            .eq("mt5_ticket", op.ticket)
-            .eq("mt5_account_id", account.id)
-            .single()
-
-          if (existingOp) {
-            skipped++
-            continue
-          }
-
-          const openTime = new Date(op.open_time)
-          const closeTime = new Date(op.close_time)
-          const durationMinutes = (closeTime.getTime() - openTime.getTime()) / 60000
-          const percentage = payload.balance ? (op.profit / payload.balance) * 100 : 0
-
-          const { error: insertError } = await supabase.from("operations").insert({
-            client_id: client.id,
-            mt5_account_id: account.id,
-            mt5_ticket: op.ticket,
-            asset: op.symbol,
-            asset_type: "Sintetico",
-            op_type: getOperationType(op.profit, durationMinutes),
-            direction: op.type,
-            lots: op.lots,
-            open_price: op.open_price,
-            close_price: op.close_price,
-            profit: op.profit,
-            percentage,
-            commission: op.commission,
-            swap: op.swap,
-            open_time: op.open_time,
-            close_time: op.close_time,
-            duration_minutes: Math.round(durationMinutes),
-            magic_number: op.magic_number,
-            comment: op.comment,
-          })
-
-          if (!insertError) synced++
-        }
-
-        // Actualizar balance
-        await supabase
-          .from("mt5_accounts")
-          .update({
-            balance: payload.balance,
-            equity: payload.equity,
-            last_sync: new Date().toISOString(),
-          })
-          .eq("id", account.id)
-
-        // Registrar actividad
-        await supabase.from("activity_log").insert({
-          client_id: client.id,
-          action: "sync_operations",
-          details: { synced, skipped, total: payload.operations.length },
-        })
 
         return NextResponse.json({
           success: true,
-          message: `Synced ${synced} operations, skipped ${skipped} duplicates`,
-          synced,
-          skipped,
-          service_active: isServiceActive,
+          message: "Data received",
+          timestamp: now,
         })
       }
-
-      case "status_update": {
-        // Actualizar estado de la cuenta
-        await supabase
-          .from("mt5_accounts")
-          .update({
-            balance: payload.balance,
-            equity: payload.equity,
-            broker: payload.broker,
-            last_sync: new Date().toISOString(),
-          })
-          .eq("id", account.id)
-
-        return NextResponse.json({
-          success: true,
-          service_active: isServiceActive,
-          message: "Status updated",
-        })
-      }
-
-      default:
-        return NextResponse.json(
-          { success: false, error: `Unknown action: ${payload.action}` },
-          { status: 400 }
-        )
     }
   } catch (error) {
-    console.error("MT5 Webhook error:", error)
+    console.error("[v0] MT5 Webhook error:", error)
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
@@ -324,18 +210,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Health check y documentacion
+// GET - Return message confirming endpoint is alive
 export async function GET() {
-  return NextResponse.json({
-    status: "online",
-    version: "1.0.0",
-    endpoints: {
-      POST: {
-        description: "Receive MT5 EA data",
-        actions: ["heartbeat", "operation_closed", "sync_operations", "status_update"],
-        required_fields: ["api_key", "account_id", "action"],
-      },
-    },
-    documentation: "Contact admin for API key and integration guide",
+  return new NextResponse("Only POST requests allowed", { 
+    status: 200,
+    headers: { "Content-Type": "text/plain" }
   })
 }
