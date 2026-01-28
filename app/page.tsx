@@ -17,6 +17,7 @@ import {
   Clock
 } from "lucide-react"
 import { useServiceStatus } from "@/hooks/use-service-status"
+import { useRealTradingData } from "@/hooks/use-real-trading-data"
 import { PaymentModal } from "@/components/dashboard/payment-modal"
 import { BotConnectionStatus } from "@/components/dashboard/bot-connection-status"
 import { Button } from "@/components/ui/button"
@@ -52,8 +53,12 @@ const navItems = [
 
 export default function DashboardClientePage() {
   const { status, pendingAmount, isLoaded, isDetected } = useServiceStatus()
+  const tradingData = useRealTradingData()
   const isPending = status === "pending"
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  
+  // Use real data from Supabase, fallback to demo data if loading or no data
+  const weeklyDataToUse = tradingData.weeklyData.length > 0 ? tradingData.weeklyData : weeklyData
 
   const handlePaymentReported = async () => {
     setPaymentModalOpen(false)
@@ -235,7 +240,7 @@ export default function DashboardClientePage() {
               </div>
               <div className="space-y-1">
                 <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                  $50,000.00
+                  ${tradingData.balance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   USD
@@ -243,56 +248,56 @@ export default function DashboardClientePage() {
               </div>
             </div>
 
-            {/* Profit Total */}
+            {/* Equity */}
             <div className={`bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6 transition-all duration-300 ${isPending ? 'hover:border-border/50' : 'hover:border-border/80'}`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
-                  Profit Total
+                  Equity
                 </span>
                 <TrendingUp className="w-4 h-4 text-success" />
               </div>
               <div className="space-y-1">
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-[oklch(0.70_0.16_145)] tracking-tight">
-                  +$12,459.40
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+                  ${tradingData.equity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[oklch(0.62_0.14_145)]">
-                  +24.92%
+                <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  USD
                 </p>
               </div>
             </div>
 
-            {/* Profit Hoy */}
+            {/* Profit Flotante */}
             <div className={`bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6 transition-all duration-300 ${isPending ? 'hover:border-border/50' : 'hover:border-border/80'}`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
-                  Profit Hoy
+                  Profit Flotante
                 </span>
                 <Calendar className="w-4 h-4 text-success" />
               </div>
               <div className="space-y-1">
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-[oklch(0.70_0.16_145)] tracking-tight">
-                  +$312.40
+                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight ${tradingData.profit >= 0 ? "text-[oklch(0.70_0.16_145)]" : "text-red-400"}`}>
+                  {tradingData.profit >= 0 ? "+" : ""}${tradingData.profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[oklch(0.62_0.14_145)]">
-                  +0.62%
+                <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${tradingData.profit >= 0 ? "text-[oklch(0.62_0.14_145)]" : "text-red-400/80"}`}>
+                  {tradingData.balance > 0 ? `${tradingData.profit >= 0 ? "+" : ""}${((tradingData.profit / tradingData.balance) * 100).toFixed(2)}%` : "0.00%"}
                 </p>
               </div>
             </div>
 
-            {/* Operaciones del Dia */}
+            {/* Operaciones Semana */}
             <div className={`bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6 transition-all duration-300 ${isPending ? 'hover:border-border/50' : 'hover:border-border/80'}`}>
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
-                  Operaciones Hoy
+                  Operaciones Semana
                 </span>
                 <Activity className="w-4 h-4 text-muted-foreground" />
               </div>
               <div className="space-y-1">
                 <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                  8
+                  {tradingData.totalOperations}
                 </p>
                 <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  6 ganadas / 2 perdidas
+                  Ultimos 7 dias
                 </p>
               </div>
             </div>
@@ -379,9 +384,9 @@ export default function DashboardClientePage() {
             </div>
 
             {/* Bolsa de Beneficio */}
-            <ProfitBag 
-              totalProfit={12459.40}
-              maxProfit={25000}
+<ProfitBag
+                totalProfit={tradingData.weeklyProfit}
+                maxProfit={Math.max(tradingData.weeklyProfit * 2, 1000)}
             />
           </div>
 
@@ -420,10 +425,10 @@ export default function DashboardClientePage() {
             {/* Rendimiento Semanal - 2 columnas */}
             <div className="lg:col-span-2">
               <WeeklyPerformance 
-                data={weeklyData}
+                data={weeklyDataToUse}
                 weekRange="20 - 26 Enero, 2026"
-                totalProfit={859.40}
-                totalPercentage={1.72}
+                totalProfit={tradingData.weeklyProfit}
+                totalPercentage={tradingData.weeklyPercentage}
               />
             </div>
             
