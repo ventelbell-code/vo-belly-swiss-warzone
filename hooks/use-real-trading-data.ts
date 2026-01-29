@@ -79,18 +79,22 @@ export function useRealTradingData(): RealTradingData {
     isLoading: true,
   })
 
-  const supabase = createClient()
-
+ const supabase = createClient()
+const ACCOUNT_ID = "TEST123"
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Get latest trade data (account state)
-        const { data: tradeData } = await supabase
-          .from("trades")
-          .select("*")
-          .order("updated_at", { ascending: false })
-          .limit(1)
-          .single()
+        
+
+
+
+const { data: tradeData } = await supabase
+  .from("trades")
+  .select("*")
+  .eq("account_id", ACCOUNT_ID)
+  .single()
+
 
         // Get operations from the last 7 days
         const weekAgo = new Date()
