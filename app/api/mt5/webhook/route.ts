@@ -20,20 +20,20 @@ console.log("📡 MT5 DATA RECEIVED:", body);
     } = body;
 
     // 🔒 Validación dura (producción)
-    if (
-      !account_id ||
-      ticket == null ||
-      !symbol ||
-      !type ||
-      lot == null ||
-      profit == null ||
-      !event
-    ) {
-      return Response.json(
-        { error: 'Missing fields' },
-        { status: 400 }
-      );
-    }
+    //if (
+    //  !account_id ||
+    //  ticket == null ||
+    //  !symbol ||
+     // !type ||
+     // lot == null ||
+     // profit == null ||
+     // !event
+    //) {
+     // return Response.json(
+     //   { error: 'Missing fields' },
+     //   { status: 400 }
+     // );
+    //}
 
     // 🧠 Normalización MT5 → DB
     const trade = {
