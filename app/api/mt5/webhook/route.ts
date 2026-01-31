@@ -1,93 +1,55 @@
+// app/api/mt5/stats/route.ts
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   try {
-    const body = await req.json();
-console.log("📡 MT5 DATA RECEIVED:", body);
-    const {
-      account_id,
-      ticket,
-      symbol,
-      type,
-      lot,
-      profit,
-      event
-    } = body;
+    // 1️⃣ Verifica variables de entorno
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    // 🔒 Validación dura (producción)
-    //if (
-    //  !account_id ||
-    //  ticket == null ||
-    //  !symbol ||
-     // !type ||
-     // lot == null ||
-     // profit == null ||
-     // !event
-    //) {
-     // return Response.json(
-     //   { error: 'Missing fields' },
-     //   { status: 400 }
-     // );
-    //}
-
-    // 🧠 Normalización MT5 → DB
-    const trade = {
-      account_id: String(account_id),
-      ticket: Number(ticket),
-      symbol: String(symbol),
-      type: String(type),
-      lot: Number(lot),
-      profit: Number(profit),
-      event: String(event),
-      updated_at: new Date().toISOString()
-    };
-
-    // 🛑 Evitar duplicados (mismo ticket + evento)
-    const { data: existing } = await supabase
-      .from('trades')
-      .select('id')
-      .eq('ticket', trade.ticket)
-      .eq('event', trade.event)
-      .limit(1)
-      .maybeSingle();
-
-    if (existing) {
+    if (!supabaseUrl || !supabaseKey) {
       return Response.json(
-        { status: 'duplicate_ignored' },
-        { status: 200 }
-      );
-    }
-
-    // 💾 Insert real
-    const { error } = await supabase
-      .from('trades')
-      .insert([trade]);
-
-    if (error) {
-      console.error('DB ERROR:', error);
-      return Response.json(
-        { error: 'Database error' },
+        { error: 'Server configuration error' },
         { status: 500 }
       );
     }
 
-    return Response.json(
-      {
-        status: 'ok',
-        trade
-      },
-      { status: 200 }
-    );
+    // 2️⃣ Inicializa Supabase SOLO en runtime
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-  } catch (err) {
-    console.error('WEBHOOK ERROR:', err);
+    // 3️⃣ Consulta últimas operaciones
+    const { data, error } = await supabase
+      .from('trades')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      return Response.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    // 4️⃣ Estadísticas básicas
+    const totalTrades = data?.length || 0;
+    const totalProfit =
+      data?.reduce((sum, trade) => sum + (trade.profit || 0), 0) || 0;
+    const totalLots =
+      data?.reduce((sum, trade) => sum + (trade.lot || 0), 0) || 0;
+
+    return Response.json({
+      success: true,
+      stats: {
+        total_trades: totalTrades,
+        total_profit: totalProfit,
+        total_lots: totalLots,
+        trades: data,
+      },
+    });
+  } catch (err: any) {
     return Response.json(
-      { error: 'Server error' },
+      { error: err.message || 'Internal server error' },
       { status: 500 }
     );
   }
