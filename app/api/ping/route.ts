@@ -1,6 +1,8 @@
+import { NextResponse } from "next/server";
+
 export async function GET() {
-  return new Response(
-    JSON.stringify({ ok: true }),
-    { status: 200 }
-  );
+  return NextResponse.json({
+    ok: true,
+    message: "ping alive"
+  });
 }
