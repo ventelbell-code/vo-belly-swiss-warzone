@@ -342,7 +342,7 @@ export default function DashboardClientePage() {
               {/* Payment Button - Always visible, no conditions */}
               <Button
                 onClick={() => setPaymentModalOpen(true)}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold py-3 h-auto text-sm"
+                className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold h-11 sm:h-12 text-xs sm:text-sm uppercase tracking-wider"
               >
                 PAGAR SERVICIO
               </Button>
@@ -476,19 +476,19 @@ export default function DashboardClientePage() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-sidebar border-t border-sidebar-border z-50">
-        <div className="flex items-center justify-around py-2 px-2 safe-area-pb">
+        <div className="flex items-center justify-around py-1.5 px-1 safe-area-pb">
           {navItems.filter(item => !item.isAdmin).map((item) => (
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg min-w-[60px] transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-md min-w-[56px] min-h-[48px] transition-all duration-200 ${
                 item.active 
                   ? 'text-sidebar-foreground bg-sidebar-accent' 
                   : 'text-sidebar-foreground/50 active:bg-sidebar-accent/30'
               }`}
             >
               <item.icon className="w-5 h-5" />
-              <span className="text-[9px] font-medium uppercase tracking-wide">{item.label}</span>
+              <span className="text-[8px] font-medium uppercase tracking-wide">{item.label}</span>
             </Link>
           ))}
         </div>
