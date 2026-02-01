@@ -9,7 +9,13 @@ import {
   Link2, 
   Check,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Copy
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -21,7 +27,9 @@ interface Client {
   email: string
   mt5_account: string | null
   mt5_server: string | null
+  mt5_password_encrypted: string | null
   mt5_connection_status: "disconnected" | "pending" | "connected" | "error" | null
+  mt5_submitted_at: string | null
   created_at: string
 }
 
@@ -36,6 +44,8 @@ export default function AdminPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [savingClientId, setSavingClientId] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState("")
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set())
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const supabase = createClient()
 
@@ -45,7 +55,7 @@ export default function AdminPage() {
     try {
       const { data, error } = await supabase
         .from("clients")
-        .select("id, name, email, mt5_account, mt5_server, mt5_connection_status, created_at")
+        .select("id, name, email, mt5_account, mt5_server, mt5_password_encrypted, mt5_connection_status, mt5_submitted_at, created_at")
         .order("created_at", { ascending: false })
       
       if (error) throw error
@@ -109,6 +119,49 @@ export default function AdminPage() {
       case "error": return "Error"
       default: return "Sin configurar"
     }
+  }
+
+  // Toggle password visibility
+  const togglePasswordVisibility = (clientId: string) => {
+    setVisiblePasswords(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(clientId)) {
+        newSet.delete(clientId)
+      } else {
+        newSet.add(clientId)
+      }
+      return newSet
+    })
+  }
+
+  // Decode password (base64)
+  const decodePassword = (encrypted: string | null) => {
+    if (!encrypted) return ""
+    try {
+      return atob(encrypted)
+    } catch {
+      return encrypted
+    }
+  }
+
+  // Copy to clipboard
+  const copyToClipboard = async (text: string, clientId: string) => {
+    await navigator.clipboard.writeText(text)
+    setCopiedId(clientId)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  // Format date
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return "—"
+    const date = new Date(dateStr)
+    return date.toLocaleDateString("es-ES", { 
+      day: "2-digit", 
+      month: "short", 
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    })
   }
 
   // Clients with MT5 configured
@@ -191,61 +244,149 @@ export default function AdminPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {clientsWithMt5.map((client) => (
                   <div 
                     key={client.id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/10 border border-border/20 rounded-md"
+                    className={`p-4 rounded-md border-l-4 ${
+                      client.mt5_connection_status === "connected"
+                        ? "bg-[oklch(0.12_0.02_145)] border-l-[oklch(0.55_0.14_145)] border border-[oklch(0.20_0.04_145)]"
+                        : client.mt5_connection_status === "error"
+                          ? "bg-[oklch(0.12_0.02_25)] border-l-[oklch(0.55_0.14_25)] border border-[oklch(0.20_0.04_25)]"
+                          : "bg-[oklch(0.12_0.02_60)] border-l-[oklch(0.65_0.14_60)] border border-[oklch(0.20_0.04_60)]"
+                    }`}
                   >
-                    {/* Client Info */}
-                    <div className="flex-1 min-w-0">
+                    {/* Header with status */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2">
                         <span 
-                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                            client.mt5_connection_status === "pending" ? "animate-pulse" : ""
+                          }`}
                           style={{ backgroundColor: getStatusColor(client.mt5_connection_status) }}
                         />
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {client.name || client.email.split("@")[0]}
-                        </p>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {client.name || client.email.split("@")[0]}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/60">{client.email}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 mt-1">
-                        <p className="text-[10px] text-muted-foreground/60 truncate">
-                          {client.email}
-                        </p>
-                        <span className="text-[10px] text-muted-foreground/40">|</span>
-                        <p className="text-[10px] text-muted-foreground/60">
-                          MT5: {client.mt5_account}
-                        </p>
-                        <span className="text-[10px] text-muted-foreground/40">|</span>
-                        <p className="text-[10px] text-muted-foreground/60">
-                          {client.mt5_server}
-                        </p>
+                      <span 
+                        className="px-2 py-1 rounded text-[10px] font-semibold uppercase tracking-wide"
+                        style={{ 
+                          backgroundColor: `color-mix(in oklch, ${getStatusColor(client.mt5_connection_status)} 15%, transparent)`,
+                          color: getStatusColor(client.mt5_connection_status)
+                        }}
+                      >
+                        {getStatusLabel(client.mt5_connection_status)}
+                      </span>
+                    </div>
+
+                    {/* MT5 Credentials Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3 p-3 bg-background/30 rounded border border-border/20">
+                      {/* Account ID */}
+                      <div>
+                        <p className="text-[8px] uppercase tracking-wider text-muted-foreground/50 mb-0.5">Account ID</p>
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-mono font-medium text-foreground">{client.mt5_account}</p>
+                          <button
+                            onClick={() => copyToClipboard(client.mt5_account || "", `acc-${client.id}`)}
+                            className="p-0.5 hover:bg-muted/30 rounded"
+                          >
+                            {copiedId === `acc-${client.id}` ? (
+                              <Check className="w-3 h-3 text-[oklch(0.55_0.14_145)]" />
+                            ) : (
+                              <Copy className="w-3 h-3 text-muted-foreground/50" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Server */}
+                      <div>
+                        <p className="text-[8px] uppercase tracking-wider text-muted-foreground/50 mb-0.5">Servidor</p>
+                        <p className="text-xs font-medium text-foreground">{client.mt5_server}</p>
+                      </div>
+
+                      {/* Password (Admin visible) */}
+                      <div>
+                        <p className="text-[8px] uppercase tracking-wider text-muted-foreground/50 mb-0.5">Password</p>
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-mono font-medium text-foreground">
+                            {visiblePasswords.has(client.id) 
+                              ? decodePassword(client.mt5_password_encrypted)
+                              : "••••••••"
+                            }
+                          </p>
+                          <button
+                            onClick={() => togglePasswordVisibility(client.id)}
+                            className="p-0.5 hover:bg-muted/30 rounded"
+                          >
+                            {visiblePasswords.has(client.id) ? (
+                              <EyeOff className="w-3 h-3 text-muted-foreground/50" />
+                            ) : (
+                              <Eye className="w-3 h-3 text-muted-foreground/50" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => copyToClipboard(decodePassword(client.mt5_password_encrypted), `pwd-${client.id}`)}
+                            className="p-0.5 hover:bg-muted/30 rounded"
+                          >
+                            {copiedId === `pwd-${client.id}` ? (
+                              <Check className="w-3 h-3 text-[oklch(0.55_0.14_145)]" />
+                            ) : (
+                              <Copy className="w-3 h-3 text-muted-foreground/50" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Submission Date */}
+                      <div>
+                        <p className="text-[8px] uppercase tracking-wider text-muted-foreground/50 mb-0.5">Enviado</p>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-muted-foreground/40" />
+                          <p className="text-[10px] text-muted-foreground/70">{formatDate(client.mt5_submitted_at)}</p>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Status Selector */}
-                    <div className="flex items-center gap-2">
-                      <Label className="text-[9px] uppercase tracking-wider text-muted-foreground/60 sm:hidden">
-                        Estado:
-                      </Label>
-                      <select
-                        value={client.mt5_connection_status || "pending"}
-                        onChange={(e) => updateMt5Status(client.id, e.target.value)}
-                        disabled={savingClientId === client.id}
-                        className="h-9 px-3 bg-muted/20 border border-border/40 rounded text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-border min-w-[140px]"
-                        style={{
-                          borderColor: getStatusColor(client.mt5_connection_status),
-                          borderWidth: "1.5px"
-                        }}
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        onClick={() => updateMt5Status(client.id, "connected")}
+                        disabled={savingClientId === client.id || client.mt5_connection_status === "connected"}
+                        size="sm"
+                        className="h-8 px-3 bg-[oklch(0.45_0.12_145)] hover:bg-[oklch(0.50_0.14_145)] text-white text-[10px] font-semibold uppercase tracking-wide disabled:opacity-40"
                       >
-                        {MT5_STATUSES.map((status) => (
-                          <option key={status.value} value={status.value} className="bg-card text-foreground">
-                            {status.label}
-                          </option>
-                        ))}
-                      </select>
+                        <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                        Marcar Conexion OK
+                      </Button>
+                      
+                      <Button
+                        onClick={() => updateMt5Status(client.id, "error")}
+                        disabled={savingClientId === client.id || client.mt5_connection_status === "error"}
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-3 border-[oklch(0.40_0.10_25)] text-[oklch(0.65_0.12_25)] hover:bg-[oklch(0.15_0.03_25)] text-[10px] font-semibold uppercase tracking-wide disabled:opacity-40 bg-transparent"
+                      >
+                        <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                        Marcar Error
+                      </Button>
+
+                      <Button
+                        onClick={() => updateMt5Status(client.id, "pending")}
+                        disabled={savingClientId === client.id || client.mt5_connection_status === "pending"}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-3 text-muted-foreground hover:text-foreground text-[10px] font-semibold uppercase tracking-wide disabled:opacity-40"
+                      >
+                        Volver a Pendiente
+                      </Button>
+
                       {savingClientId === client.id && (
-                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground ml-2" />
                       )}
                     </div>
                   </div>
