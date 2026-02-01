@@ -387,19 +387,14 @@ export default function DashboardClientePage() {
             </p>
           </div>
 
-          {/* Rendimiento Semanal + Actividad en Tiempo Real */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            {/* Rendimiento Semanal - 2 columnas */}
-            <div className="lg:col-span-2">
-              <WeeklyPerformance 
-                data={weeklyDataToUse}
-                weekRange="20 - 26 Enero, 2026"
-                totalProfit={tradingData.weeklyProfit}
-                totalPercentage={tradingData.weeklyPercentage}
-              />
-            </div>
-            
-            {/* Actividad en Tiempo Real - 1 columna */}
+          {/* Rendimiento Semanal + Actividad en Tiempo Real - Single row layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-3">
+            <WeeklyPerformance 
+              data={weeklyDataToUse}
+              weekRange="20 - 26 Enero, 2026"
+              totalProfit={tradingData.weeklyProfit}
+              totalPercentage={tradingData.weeklyPercentage}
+            />
             <LiveActivityTimeline />
           </div>
 
