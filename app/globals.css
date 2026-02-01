@@ -564,6 +564,109 @@
   animation: tooltip-fade-in 120ms ease-out forwards;
 }
 
+/* INSTITUTIONAL SILVER TITLE EFFECT - Swiss Banking Style */
+@keyframes silver-flash-in {
+  0% {
+    opacity: 0;
+    filter: brightness(2.5) blur(2px);
+    transform: translateY(8px);
+  }
+  30% {
+    opacity: 1;
+    filter: brightness(1.8) blur(0);
+    transform: translateY(0);
+  }
+  60% {
+    filter: brightness(1.2);
+  }
+  100% {
+    filter: brightness(1);
+    opacity: 1;
+  }
+}
+
+@keyframes silver-shimmer {
+  0%, 100% {
+    background-position: -200% center;
+  }
+  50% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes silver-shimmer-subtle {
+  0% {
+    background-position: -100% center;
+    filter: brightness(1);
+  }
+  25% {
+    filter: brightness(1.02);
+  }
+  50% {
+    background-position: 100% center;
+    filter: brightness(1.04);
+  }
+  75% {
+    filter: brightness(1.02);
+  }
+  100% {
+    background-position: -100% center;
+    filter: brightness(1);
+  }
+}
+
+.silver-title-institutional {
+  /* Base silver metallic gradient - dark gray to silver to soft white */
+  background: linear-gradient(
+    135deg,
+    oklch(0.45 0.005 260) 0%,
+    oklch(0.70 0.008 260) 25%,
+    oklch(0.88 0.005 260) 50%,
+    oklch(0.70 0.008 260) 75%,
+    oklch(0.45 0.005 260) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  
+  /* Subtle 3D depth without hard shadows */
+  text-shadow: 
+    0 1px 1px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    0 0 30px rgba(180, 185, 195, 0.08);
+  
+  /* Initial flash animation */
+  animation: silver-flash-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.silver-title-institutional.shimmer-active {
+  animation: 
+    silver-flash-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    silver-shimmer-subtle 12s ease-in-out 0.8s infinite;
+}
+
+/* Mobile: reduce shimmer for legibility */
+@media (max-width: 640px) {
+  .silver-title-institutional {
+    background: linear-gradient(
+      135deg,
+      oklch(0.55 0.005 260) 0%,
+      oklch(0.78 0.005 260) 50%,
+      oklch(0.55 0.005 260) 100%
+    );
+    background-size: 100% auto;
+    text-shadow: 
+      0 1px 1px rgba(0, 0, 0, 0.4),
+      0 2px 3px rgba(0, 0, 0, 0.2);
+    animation: silver-flash-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  
+  .silver-title-institutional.shimmer-active {
+    animation: silver-flash-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+}
+
 /* Mobile Safe Area for devices with notch/home indicator */
 .safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0);

@@ -12,8 +12,18 @@ import {
   Bot,
   Lock
 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export default function LandingPage() {
+  const [shimmerActive, setShimmerActive] = useState(false)
+  
+  useEffect(() => {
+    // Activate shimmer after initial flash completes
+    const timer = setTimeout(() => {
+      setShimmerActive(true)
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [])
   return (
     <main className="min-h-screen bg-background relative overflow-hidden">
       {/* Deep gradient background with depth */}
@@ -78,11 +88,26 @@ export default function LandingPage() {
               </span>
             </div>
 
-            {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight text-balance">
-              Trading Algoritmico
+            {/* Main Heading - Institutional Silver Effect */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-balance">
+              <span 
+                className={`silver-title-institutional ${shimmerActive ? 'shimmer-active' : ''}`}
+                style={{
+                  display: 'inline-block',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Trading Algoritmico
+              </span>
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white/90 to-white/60">
+              <span 
+                className={`silver-title-institutional ${shimmerActive ? 'shimmer-active' : ''}`}
+                style={{
+                  display: 'inline-block',
+                  letterSpacing: '-0.02em',
+                  animationDelay: '0.15s',
+                }}
+              >
                 de Nivel Institucional
               </span>
             </h1>
