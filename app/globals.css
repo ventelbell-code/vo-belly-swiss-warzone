@@ -646,24 +646,42 @@
     silver-shimmer-subtle 12s ease-in-out 0.8s infinite;
 }
 
-/* Mobile: reduce shimmer for legibility */
+/* Mobile: optimized for legibility while keeping premium feel */
 @media (max-width: 640px) {
   .silver-title-institutional {
+    /* Higher contrast gradient for mobile - more white, less dark gray */
     background: linear-gradient(
       135deg,
-      oklch(0.55 0.005 260) 0%,
-      oklch(0.78 0.005 260) 50%,
-      oklch(0.55 0.005 260) 100%
+      oklch(0.70 0.003 260) 0%,
+      oklch(0.88 0.003 260) 45%,
+      oklch(0.92 0.002 260) 55%,
+      oklch(0.88 0.003 260) 100%
     );
     background-size: 100% auto;
-    text-shadow: 
-      0 1px 1px rgba(0, 0, 0, 0.4),
-      0 2px 3px rgba(0, 0, 0, 0.2);
-    animation: silver-flash-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Minimal shadow for depth without obscuring text */
+    text-shadow: none;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    /* No shimmer animation on mobile for clarity */
+    animation: silver-flash-in-mobile 0.5s ease-out forwards;
   }
   
   .silver-title-institutional.shimmer-active {
-    animation: silver-flash-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: silver-flash-in-mobile 0.5s ease-out forwards;
+  }
+}
+
+/* Simpler mobile flash animation */
+@keyframes silver-flash-in-mobile {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

@@ -175,22 +175,19 @@ export default function LandingPage() {
             </div>
 
             {/* Main Heading - Institutional Silver Effect */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] sm:leading-tight tracking-tight text-balance">
+            <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.15] sm:leading-[1.1] tracking-[-0.01em] sm:tracking-tight px-2 sm:px-0">
               <span 
                 className={`silver-title-institutional ${shimmerActive ? 'shimmer-active' : ''}`}
                 style={{
-                  display: 'inline-block',
-                  letterSpacing: '-0.02em',
+                  display: 'block',
                 }}
               >
                 Trading Algoritmico
               </span>
-              <br />
               <span 
-                className={`silver-title-institutional ${shimmerActive ? 'shimmer-active' : ''}`}
+                className={`silver-title-institutional ${shimmerActive ? 'shimmer-active' : ''} mt-1 sm:mt-0`}
                 style={{
-                  display: 'inline-block',
-                  letterSpacing: '-0.02em',
+                  display: 'block',
                   animationDelay: '0.15s',
                 }}
               >
