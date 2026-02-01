@@ -187,198 +187,174 @@ export default function DashboardClientePage() {
         </header>
 
         {/* Dashboard Content */}
-        <div className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 space-y-5 sm:space-y-6 lg:space-y-8 overflow-auto">
+        <div className="flex-1 p-3 sm:p-4 lg:p-6 pb-20 lg:pb-6 space-y-3 sm:space-y-4 overflow-auto">
           {/* Bot Connection Status - Shows real data from MT5 */}
           <BotConnectionStatus />
 
-          {/* Aviso de Estado del Sistema */}
+          {/* Aviso de Estado del Sistema - Compacto */}
           {isLoaded && (
             isDetected ? (
-              <div className="flex items-center gap-3 px-5 py-4 bg-[oklch(0.14_0.02_250)] border border-[oklch(0.24_0.06_250)] rounded-lg">
-                <Clock className="w-4 h-4 text-[oklch(0.65_0.12_250)] flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-[oklch(0.75_0.08_250)]">
-                    Pago detectado en blockchain
-                  </p>
-                  <p className="text-xs text-[oklch(0.60_0.06_250)]">
-                    Tu pago USDT ha sido detectado y esta pendiente de confirmacion por el administrador.
-                  </p>
-                </div>
+              <div className="flex items-center gap-2 px-3 py-2 bg-[oklch(0.12_0.02_250)] border border-[oklch(0.22_0.04_250)] rounded-md">
+                <Clock className="w-3.5 h-3.5 text-[oklch(0.60_0.10_250)] flex-shrink-0" />
+                <p className="text-[10px] sm:text-[11px] font-medium text-[oklch(0.68_0.06_250)]">
+                  Pago detectado - Pendiente confirmacion
+                </p>
               </div>
             ) : isPending ? (
-              <div className="flex items-center gap-3 px-5 py-4 bg-[oklch(0.14_0.02_85)] border border-[oklch(0.24_0.05_85)] rounded-lg">
-                <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.70_0.12_85)] animate-status-pending" />
+              <div className="flex items-center gap-2 px-3 py-2 bg-[oklch(0.12_0.02_85)] border border-[oklch(0.22_0.04_85)] rounded-md">
+                <span className="relative flex h-2 w-2 flex-shrink-0">
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.68_0.10_85)] animate-status-pending" />
                 </span>
-                <p className="text-sm font-medium text-[oklch(0.75_0.08_85)]">
-                  El sistema entrara en pausa si el servicio no se regulariza.
+                <p className="text-[10px] sm:text-[11px] font-medium text-[oklch(0.70_0.06_85)]">
+                  Sistema en pausa hasta regularizar servicio
                 </p>
               </div>
             ) : (
-              <div className="flex items-center gap-3 px-5 py-4 bg-[oklch(0.14_0.02_145)] border border-[oklch(0.24_0.05_145)] rounded-lg">
-                <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.58_0.14_145)] animate-status-active" />
+              <div className="flex items-center gap-2 px-3 py-2 bg-[oklch(0.12_0.02_145)] border border-[oklch(0.22_0.04_145)] rounded-md">
+                <span className="relative flex h-2 w-2 flex-shrink-0">
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.55_0.12_145)] animate-status-active" />
                 </span>
-                <p className="text-sm font-medium text-[oklch(0.65_0.10_145)]">
-                  Sistema Operando con Normalidad
+                <p className="text-[10px] sm:text-[11px] font-medium text-[oklch(0.60_0.08_145)]">
+                  Sistema operando normalmente
                 </p>
               </div>
             )
           )}
 
-          {/* Metricas Principales */}
-          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 ${isPending ? 'opacity-90' : ''}`}>
+          {/* Metricas Principales - Grid uniforme */}
+          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 ${isPending ? 'opacity-90' : ''}`}>
             {/* Capital Inicial */}
-            <div className={`bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6 transition-all duration-300 ${isPending ? 'hover:border-border/50' : 'hover:border-border/80'}`}>
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
+            <div className="bg-card border border-border/40 rounded-md p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   Capital Inicial
                 </span>
-                <Wallet className="w-4 h-4 text-muted-foreground" />
+                <Wallet className="w-3.5 h-3.5 text-muted-foreground/60" />
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                  ${tradingData.balance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  USD
-                </p>
-              </div>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground tracking-tight">
+                ${tradingData.balance.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+              <p className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60 mt-0.5">
+                USD
+              </p>
             </div>
 
             {/* Equity */}
-            <div className={`bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6 transition-all duration-300 ${isPending ? 'hover:border-border/50' : 'hover:border-border/80'}`}>
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
+            <div className="bg-card border border-border/40 rounded-md p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   Equity
                 </span>
-                <TrendingUp className="w-4 h-4 text-success" />
+                <TrendingUp className="w-3.5 h-3.5 text-muted-foreground/60" />
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                  ${tradingData.equity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  USD
-                </p>
-              </div>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground tracking-tight">
+                ${tradingData.equity.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+              <p className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60 mt-0.5">
+                USD
+              </p>
             </div>
 
             {/* Profit Flotante */}
-            <div className={`bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6 transition-all duration-300 ${isPending ? 'hover:border-border/50' : 'hover:border-border/80'}`}>
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
+            <div className="bg-card border border-border/40 rounded-md p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   Profit Flotante
                 </span>
-                <Calendar className="w-4 h-4 text-success" />
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground/60" />
               </div>
-              <div className="space-y-1">
-                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight ${tradingData.profit >= 0 ? "text-[oklch(0.70_0.16_145)]" : "text-red-400"}`}>
-                  {tradingData.profit >= 0 ? "+" : ""}${tradingData.profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${tradingData.profit >= 0 ? "text-[oklch(0.62_0.14_145)]" : "text-red-400/80"}`}>
-                  {tradingData.balance > 0 ? `${tradingData.profit >= 0 ? "+" : ""}${((tradingData.profit / tradingData.balance) * 100).toFixed(2)}%` : "0.00%"}
-                </p>
-              </div>
+              <p className={`text-lg sm:text-xl lg:text-2xl font-bold tracking-tight ${tradingData.profit >= 0 ? "text-[oklch(0.65_0.14_145)]" : "text-red-400"}`}>
+                {tradingData.profit >= 0 ? "+" : ""}${tradingData.profit.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+              <p className={`text-[8px] sm:text-[9px] font-semibold uppercase tracking-wider mt-0.5 ${tradingData.profit >= 0 ? "text-[oklch(0.55_0.12_145)]" : "text-red-400/70"}`}>
+                {tradingData.balance > 0 ? `${tradingData.profit >= 0 ? "+" : ""}${((tradingData.profit / tradingData.balance) * 100).toFixed(2)}%` : "0.00%"}
+              </p>
             </div>
 
             {/* Operaciones Semana */}
-            <div className={`bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6 transition-all duration-300 ${isPending ? 'hover:border-border/50' : 'hover:border-border/80'}`}>
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
-                  Operaciones Semana
+            <div className="bg-card border border-border/40 rounded-md p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                  Ops. Semana
                 </span>
-                <Activity className="w-4 h-4 text-muted-foreground" />
+                <Activity className="w-3.5 h-3.5 text-muted-foreground/60" />
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                  {tradingData.totalOperations}
-                </p>
-                <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Ultimos 7 dias
-                </p>
-              </div>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground tracking-tight">
+                {tradingData.totalOperations}
+              </p>
+              <p className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60 mt-0.5">
+                7 dias
+              </p>
             </div>
           </div>
 
           {/* Coste del Servicio + Estado del Servicio + Bolsa de Beneficio */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-            {/* Coste del Servicio - 2 columnas */}
-            <div className="lg:col-span-2 bg-card border border-border/50 rounded-lg p-4 sm:p-5 lg:p-6">
-              <div className="flex items-center justify-between mb-4 sm:mb-5">
-                <h2 className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Coste del Servicio */}
+            <div className="sm:col-span-2 bg-card border border-border/40 rounded-md p-3 sm:p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                   Coste del Servicio
                 </h2>
-                <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-muted/40 px-2 sm:px-2.5 py-1 rounded">
-                  Informativo
+                <span className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60 bg-muted/30 px-2 py-0.5 rounded">
+                  Info
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4 mb-4">
-                <div className="text-center p-2.5 sm:p-3 lg:p-4 bg-muted/30 rounded border border-border/40">
-                  <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.08em] sm:tracking-[0.1em] text-muted-foreground mb-1.5 sm:mb-2">
-                    Ops. Cerradas
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className="text-center p-2 sm:p-2.5 bg-muted/20 rounded border border-border/30">
+                  <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70 mb-1">
+                    Ops.
                   </p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">8</p>
+                  <p className="text-base sm:text-lg font-bold text-foreground">8</p>
                 </div>
-                <div className="text-center p-2.5 sm:p-3 lg:p-4 bg-muted/30 rounded border border-border/40">
-                  <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.08em] sm:tracking-[0.1em] text-muted-foreground mb-1.5 sm:mb-2">
-                    Coste/Op
+                <div className="text-center p-2 sm:p-2.5 bg-muted/20 rounded border border-border/30">
+                  <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70 mb-1">
+                    c/u
                   </p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">$1.00</p>
+                  <p className="text-base sm:text-lg font-bold text-foreground">$1</p>
                 </div>
-                <div className="text-center p-2.5 sm:p-3 lg:p-4 bg-muted/30 rounded border border-border/40">
-                  <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.08em] sm:tracking-[0.1em] text-muted-foreground mb-1.5 sm:mb-2">
+                <div className="text-center p-2 sm:p-2.5 bg-muted/20 rounded border border-border/30">
+                  <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70 mb-1">
                     Total
                   </p>
-                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">$8.00</p>
+                  <p className="text-base sm:text-lg font-bold text-foreground">$8</p>
                 </div>
               </div>
 
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground text-center mb-4">
-                Este panel es informativo. Los pagos se realizan externamente.
-              </p>
-
-              {/* Payment Button - Always visible, no conditions */}
               <Button
                 onClick={() => setPaymentModalOpen(true)}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold h-11 sm:h-12 text-xs sm:text-sm uppercase tracking-wider"
+                className="w-full bg-amber-500/90 hover:bg-amber-500 text-black font-semibold h-10 text-[11px] sm:text-xs uppercase tracking-wider"
               >
                 PAGAR SERVICIO
               </Button>
             </div>
 
-            {/* Estado del Servicio - 1 columna, compacto */}
-            <div className="bg-card border border-border/50 rounded-lg p-4 sm:p-5">
-              <h2 className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground mb-3 sm:mb-4">
-                Estado del Servicio
+            {/* Estado del Servicio - Compacto y centrado */}
+            <div className="bg-card border border-border/40 rounded-md p-3 sm:p-4 flex flex-col">
+              <h2 className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mb-2 sm:mb-3">
+                Estado
               </h2>
 
-              <div className="space-y-3 mb-3 sm:mb-4">
-                {/* Estado Actual - Dinamico */}
+              <div className="flex-1 flex items-center justify-center">
                 {isPending ? (
-                  <div className="flex items-center gap-2.5 px-3 py-2.5 sm:py-3 bg-[oklch(0.18_0.04_85)] rounded border border-[oklch(0.28_0.06_85)]">
-                    <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.72_0.14_85)] animate-status-pending" />
+                  <div className="text-center p-3 bg-[oklch(0.15_0.03_85)] rounded border border-[oklch(0.25_0.05_85)] w-full">
+                    <span className="relative flex h-2 w-2 mx-auto mb-2">
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.70_0.12_85)] animate-status-pending" />
                     </span>
-                    <div className="min-w-0">
-                      <span className="text-[13px] sm:text-sm font-semibold text-[oklch(0.78_0.10_85)] block">En Espera de Pago</span>
-                      <p className="text-[11px] sm:text-xs font-medium text-[oklch(0.70_0.08_85)] mt-0.5">Pendiente: ${pendingAmount.toFixed(2)}</p>
-                    </div>
+                    <p className="text-[11px] sm:text-xs font-semibold text-[oklch(0.75_0.08_85)]">En Espera</p>
+                    <p className="text-[9px] sm:text-[10px] font-medium text-[oklch(0.65_0.06_85)] mt-0.5">${pendingAmount.toFixed(2)}</p>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2.5 px-3 py-2.5 sm:py-3 bg-[oklch(0.18_0.04_145)] rounded border border-[oklch(0.28_0.06_145)]">
-                    <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.60_0.16_145)] animate-status-active" />
+                  <div className="text-center p-3 bg-[oklch(0.15_0.03_145)] rounded border border-[oklch(0.25_0.05_145)] w-full">
+                    <span className="relative flex h-2 w-2 mx-auto mb-2">
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.58_0.14_145)] animate-status-active" />
                     </span>
-                    <span className="text-[13px] sm:text-sm font-semibold text-[oklch(0.68_0.12_145)]">Sistema Activo</span>
+                    <p className="text-[11px] sm:text-xs font-semibold text-[oklch(0.65_0.10_145)]">Activo</p>
+                    <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground/60 mt-0.5">Al dia</p>
                   </div>
                 )}
               </div>
-
-              <p className="text-[11px] sm:text-xs font-medium text-muted-foreground leading-relaxed">
-                El sistema se mantiene activo mientras el servicio este al dia.
-              </p>
             </div>
 
             {/* Bolsa de Beneficio */}
@@ -388,38 +364,31 @@ export default function DashboardClientePage() {
             />
           </div>
 
-          {/* Bloque de Confianza Institucional */}
-          <div className={`flex items-start gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 border rounded-lg ${
+          {/* Bloque de Confianza Institucional - Compacto */}
+          <div className={`flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 border rounded-md ${
             isPending 
-              ? 'bg-[oklch(0.12_0.01_85)] border-[oklch(0.22_0.04_85)]' 
-              : 'bg-card/50 border-border/40'
+              ? 'bg-[oklch(0.12_0.01_85)] border-[oklch(0.20_0.03_85)]' 
+              : 'bg-card/40 border-border/30'
           }`}>
-            <span className="relative flex h-2.5 w-2.5 mt-0.5 sm:mt-1 flex-shrink-0">
+            <span className="relative flex h-2 w-2 flex-shrink-0">
               {isPending ? (
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.70_0.12_85)] animate-status-pending" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.68_0.10_85)] animate-status-pending" />
               ) : (
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.58_0.14_145)] animate-status-active" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.55_0.12_145)] animate-status-active" />
               )}
             </span>
-            <div className="flex-1 min-w-0">
-              <h3 className={`text-[11px] sm:text-xs font-semibold uppercase tracking-[0.10em] sm:tracking-[0.12em] mb-1.5 sm:mb-2 ${
-                isPending ? 'text-[oklch(0.72_0.08_85)]' : 'text-foreground/80'
-              }`}>
-                {isPending ? 'Operativa en Modo Lectura' : 'Operativa Institucional Activa'}
-              </h3>
-              <p className={`text-[12px] sm:text-sm font-medium leading-relaxed ${
-                isPending ? 'text-[oklch(0.62_0.05_85)]' : 'text-muted-foreground'
-              }`}>
-                {isPending 
-                  ? 'El sistema se encuentra en espera. Las nuevas ejecuciones estan temporalmente pausadas hasta regularizar el servicio.'
-                  : 'El sistema ejecuta operaciones de forma automatica bajo parametros institucionales. El rendimiento y la continuidad dependen del estado del servicio.'
-                }
-              </p>
-            </div>
+            <p className={`text-[10px] sm:text-[11px] font-medium ${
+              isPending ? 'text-[oklch(0.65_0.06_85)]' : 'text-muted-foreground/70'
+            }`}>
+              {isPending 
+                ? 'Sistema en espera. Operaciones pausadas hasta regularizar el servicio.'
+                : 'Sistema ejecutando operaciones automaticas bajo parametros institucionales.'
+              }
+            </p>
           </div>
 
           {/* Rendimiento Semanal + Actividad en Tiempo Real */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {/* Rendimiento Semanal - 2 columnas */}
             <div className="lg:col-span-2">
               <WeeklyPerformance 
@@ -437,37 +406,37 @@ export default function DashboardClientePage() {
           {/* Control de Operativa Diaria */}
           <DailyControlPanel />
 
-          {/* Estado del Sistema */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-6 bg-card/50 border border-border/40 rounded-lg">
-            <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Estado del Sistema - Compacto */}
+          <div className="flex items-center justify-between gap-3 py-2.5 px-3 sm:px-4 bg-card/30 border border-border/30 rounded-md">
+            <div className="flex items-center gap-2">
               {isPending ? (
                 <>
-                  <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.72_0.14_85)] animate-status-pending" />
+                  <span className="relative flex h-2 w-2 flex-shrink-0">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.68_0.12_85)] animate-status-pending" />
                   </span>
-                  <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.10em] sm:tracking-[0.12em] text-[oklch(0.75_0.10_85)]">
-                    En Espera de Pago
+                  <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-[oklch(0.70_0.08_85)]">
+                    En Espera
                   </span>
                 </>
               ) : (
                 <>
-                  <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[oklch(0.60_0.16_145)] animate-status-active" />
+                  <span className="relative flex h-2 w-2 flex-shrink-0">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.55_0.14_145)] animate-status-active" />
                   </span>
-                  <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.10em] sm:tracking-[0.12em] text-foreground/80">
-                    Sistema Activo
+                  <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground/70">
+                    Activo
                   </span>
                 </>
               )}
             </div>
-            <div className="flex items-center gap-4 sm:gap-6">
-              <div className="text-left sm:text-right">
-                <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ultima actualizacion</p>
-                <p className="text-[12px] sm:text-sm font-medium text-foreground/80">Hace 2 minutos</p>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60">Actualizado</p>
+                <p className="text-[10px] sm:text-[11px] font-medium text-foreground/70">2 min</p>
               </div>
-              <div className="text-left sm:text-right">
-                <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Proxima operacion</p>
-                <p className="text-[12px] sm:text-sm font-medium text-foreground/80">En espera</p>
+              <div className="text-right hidden sm:block">
+                <p className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60">Proxima op.</p>
+                <p className="text-[10px] sm:text-[11px] font-medium text-foreground/70">Espera</p>
               </div>
             </div>
           </div>
