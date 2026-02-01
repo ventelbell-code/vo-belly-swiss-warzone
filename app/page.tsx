@@ -204,25 +204,14 @@ export default function LandingPage() {
               Maximiza tu potencial de inversion con algoritmos probados.
             </p>
 
-            {/* CTA Buttons - Glassmorphism Institutional */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
+            {/* CTA Button - Glassmorphism Institutional */}
+            <div className="flex items-center justify-center pt-6">
               <Link href="/login">
                 <button 
                   className="btn-glass-institutional h-14 px-10 rounded-lg font-semibold uppercase tracking-[0.15em] text-[13px] text-white/90 flex items-center justify-center gap-3 group"
                 >
                   <span className="relative z-10">Acceder al Terminal</span>
                   <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
-                </button>
-              </Link>
-              <Link href="/dashboard">
-                <button 
-                  className="btn-glass-institutional h-14 px-10 rounded-lg font-medium uppercase tracking-[0.15em] text-[13px] text-white/70 hover:text-white/90 flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(15, 17, 22, 0.7) 0%, rgba(20, 22, 28, 0.6) 100%)',
-                    borderColor: 'rgba(180, 185, 195, 0.1)',
-                  }}
-                >
-                  <span className="relative z-10">Ver Demo</span>
                 </button>
               </Link>
             </div>
