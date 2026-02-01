@@ -146,11 +146,11 @@ export default function LandingPage() {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header */}
-        <header className="w-full px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between max-w-7xl mx-auto">
-          <AnimatedLogo size="md" />
+        <header className="w-full px-4 sm:px-6 py-3 sm:py-6 flex items-center justify-between max-w-7xl mx-auto">
+          <AnimatedLogo size="sm" className="sm:w-56" />
           <Link href="/login">
             <button 
-              className="btn-glass-institutional h-10 px-5 rounded-md text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.15em] text-white/80 hover:text-white/95"
+              className="btn-glass-institutional h-11 sm:h-10 px-4 sm:px-5 rounded-md text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.15em] text-white/80 hover:text-white/95 min-w-[90px]"
               style={{
                 background: 'linear-gradient(135deg, rgba(15, 17, 22, 0.75) 0%, rgba(25, 27, 35, 0.65) 100%)',
               }}
@@ -202,10 +202,10 @@ export default function LandingPage() {
             </p>
 
             {/* CTA Button - Glassmorphism Institutional */}
-            <div className="flex items-center justify-center pt-6">
-              <Link href="/login">
+            <div className="flex items-center justify-center pt-4 sm:pt-6 px-4 sm:px-0">
+              <Link href="/login" className="w-full sm:w-auto">
                 <button 
-                  className="btn-glass-institutional h-14 px-10 rounded-lg font-semibold uppercase tracking-[0.15em] text-[13px] text-white/90 flex items-center justify-center gap-3 group"
+                  className="btn-glass-institutional w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-10 rounded-lg font-semibold uppercase tracking-[0.1em] sm:tracking-[0.15em] text-[12px] sm:text-[13px] text-white/90 flex items-center justify-center gap-2 sm:gap-3 group"
                 >
                   <span className="relative z-10">ACCEDER A LA ZONA</span>
                   <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
