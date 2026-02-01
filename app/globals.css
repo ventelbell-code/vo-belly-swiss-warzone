@@ -667,6 +667,154 @@
   }
 }
 
+/* GLASSMORPHISM CTA BUTTON - Swiss Institutional Style */
+@keyframes glass-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes glass-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 1px rgba(180, 185, 195, 0.15),
+      0 4px 20px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 1px rgba(180, 185, 195, 0.25),
+      0 4px 24px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+}
+
+.btn-glass-institutional {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(20, 22, 28, 0.85) 0%,
+    rgba(30, 32, 40, 0.75) 50%,
+    rgba(20, 22, 28, 0.85) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(180, 185, 195, 0.15);
+  box-shadow: 
+    0 0 0 1px rgba(180, 185, 195, 0.08),
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Silver shimmer overlay */
+.btn-glass-institutional::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(180, 185, 195, 0.04) 40%,
+    rgba(220, 225, 235, 0.08) 50%,
+    rgba(180, 185, 195, 0.04) 60%,
+    transparent 100%
+  );
+  transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-glass-institutional:hover {
+  border-color: rgba(180, 185, 195, 0.35);
+  box-shadow: 
+    0 0 0 1px rgba(180, 185, 195, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-glass-institutional:hover::before {
+  left: 100%;
+}
+
+/* Inner glow on hover */
+.btn-glass-institutional::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(180, 185, 195, 0) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.btn-glass-institutional:hover::after {
+  opacity: 1;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(180, 185, 195, 0.1) 0%,
+    transparent 70%
+  );
+}
+
+/* Mobile optimization */
+@media (max-width: 640px) {
+  .btn-glass-institutional {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .btn-glass-institutional::before {
+    display: none;
+  }
+}
+
+/* INSTITUTIONAL DATA FLOW BACKGROUND */
+@keyframes data-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.015;
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+    opacity: 0.025;
+  }
+  50% {
+    transform: translateY(-5px) translateX(-3px);
+    opacity: 0.02;
+  }
+  75% {
+    transform: translateY(-15px) translateX(2px);
+    opacity: 0.018;
+  }
+}
+
+@keyframes grid-pulse {
+  0%, 100% {
+    opacity: 0.02;
+  }
+  50% {
+    opacity: 0.035;
+  }
+}
+
+.data-flow-bg {
+  animation: data-float 30s ease-in-out infinite;
+}
+
+.grid-institutional {
+  animation: grid-pulse 8s ease-in-out infinite;
+}
+
 /* Mobile Safe Area for devices with notch/home indicator */
 .safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0);
