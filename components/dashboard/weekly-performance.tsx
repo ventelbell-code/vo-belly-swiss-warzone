@@ -1,8 +1,13 @@
 "use client"
 
 import React from "react"
-
 import { useState, useEffect, useRef } from "react"
+
+// MetaTrader Blue Color - Classic MT4/MT5 blue
+const MT_BLUE = "oklch(0.58 0.18 250)" // MetaTrader classic blue
+const MT_BLUE_LIGHT = "oklch(0.65 0.16 250)"
+const MT_BLUE_DARK = "oklch(0.48 0.15 250)"
+const MT_BLUE_RGB = "65, 105, 225" // For rgba usage
 
 interface DayData {
   day: string
@@ -11,7 +16,7 @@ interface DayData {
   percentage: number
   operations: number
   cumulative: number
-  intraday?: number[] // Puntos intradiarios para curva realista
+  intraday?: number[]
 }
 
 interface WeeklyPerformanceProps {
@@ -179,10 +184,10 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
     
     if (animatedChartPoints.length < 2) return
 
-    // Draw area fill with gradient
+    // Draw area fill with gradient - MetaTrader Blue
     const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom)
-    gradient.addColorStop(0, "rgba(80, 180, 150, 0.12)")
-    gradient.addColorStop(1, "rgba(80, 180, 150, 0)")
+    gradient.addColorStop(0, `rgba(${MT_BLUE_RGB}, 0.15)`)
+    gradient.addColorStop(1, `rgba(${MT_BLUE_RGB}, 0)`)
     
     ctx.beginPath()
     ctx.moveTo(animatedChartPoints[0].x, height - padding.bottom)
@@ -201,7 +206,7 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
       ctx.lineTo(animatedChartPoints[i].x, animatedChartPoints[i].y)
     }
     
-    ctx.strokeStyle = "rgba(80, 180, 150, 0.85)"
+    ctx.strokeStyle = `rgba(${MT_BLUE_RGB}, 0.9)`
     ctx.lineWidth = 1.5
     ctx.stroke()
 
@@ -211,11 +216,11 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
       const isLastPoint = i === data.length - 1 || (i < data.length - 1 && data.slice(i + 1).every(d => d.profit === 0))
       const radius = isHovered ? 5 : isLastPoint ? 4 : 3
       
-      // Glow effect for hovered point
+      // Glow effect for hovered point - MetaTrader Blue
       if (isHovered) {
         ctx.beginPath()
         ctx.arc(p.x, p.y, 12, 0, Math.PI * 2)
-        ctx.fillStyle = "rgba(80, 180, 150, 0.25)"
+        ctx.fillStyle = `rgba(${MT_BLUE_RGB}, 0.3)`
         ctx.fill()
       }
       
@@ -223,28 +228,28 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
       if (isLastPoint && !isHovered) {
         ctx.beginPath()
         ctx.arc(p.x, p.y, 8 + pulseOpacity * 4, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(80, 180, 150, ${pulseOpacity * 0.3})`
+        ctx.fillStyle = `rgba(${MT_BLUE_RGB}, ${pulseOpacity * 0.35})`
         ctx.fill()
       }
       
-      // Main dot
+      // Main dot - MetaTrader Blue
       ctx.beginPath()
       ctx.arc(p.x, p.y, radius, 0, Math.PI * 2)
       ctx.fillStyle = isHovered 
-        ? "rgba(80, 180, 150, 1)" 
+        ? `rgba(${MT_BLUE_RGB}, 1)` 
         : isLastPoint 
-          ? `rgba(80, 180, 150, ${0.7 + pulseOpacity * 0.3})` 
-          : "rgba(80, 180, 150, 0.5)"
+          ? `rgba(${MT_BLUE_RGB}, ${0.7 + pulseOpacity * 0.3})` 
+          : `rgba(${MT_BLUE_RGB}, 0.6)`
       ctx.fill()
       
       // Inner highlight
       ctx.beginPath()
       ctx.arc(p.x, p.y, radius - 1, 0, Math.PI * 2)
       ctx.fillStyle = isHovered 
-        ? "rgba(120, 210, 180, 1)" 
+        ? "rgba(100, 140, 255, 1)" 
         : isLastPoint 
-          ? "rgba(100, 200, 170, 0.9)" 
-          : "rgba(60, 160, 130, 0.7)"
+          ? "rgba(85, 125, 240, 0.9)" 
+          : "rgba(70, 110, 220, 0.7)"
       ctx.fill()
     })
 
@@ -274,9 +279,9 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
       ctx.roundRect(tooltipX + 2, tooltipY + 2, tooltipWidth, tooltipHeight, radius2)
       ctx.fill()
       
-      // Tooltip background
+      // Tooltip background - MetaTrader Blue accent
       ctx.fillStyle = "rgba(15, 20, 30, 0.97)"
-      ctx.strokeStyle = "rgba(80, 180, 150, 0.4)"
+      ctx.strokeStyle = `rgba(${MT_BLUE_RGB}, 0.5)`
       ctx.lineWidth = 1
       
       ctx.beginPath()
@@ -290,8 +295,8 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
       ctx.textAlign = "left"
       ctx.fillText(d.day.toUpperCase(), tooltipX + 12, tooltipY + 18)
       
-      // Profit value (larger)
-      ctx.fillStyle = d.profit >= 0 ? "rgba(90, 200, 160, 1)" : "rgba(220, 110, 110, 1)"
+      // Profit value (larger) - MetaTrader Blue for profit
+      ctx.fillStyle = d.profit >= 0 ? `rgba(${MT_BLUE_RGB}, 1)` : "rgba(220, 110, 110, 1)"
       ctx.font = "bold 15px system-ui"
       ctx.fillText(`${d.profit >= 0 ? '+' : ''}$${d.profit.toFixed(2)}`, tooltipX + 12, tooltipY + 40)
       
@@ -300,9 +305,9 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
       ctx.font = "10px system-ui"
       ctx.fillText(`${d.operations} operaciones`, tooltipX + 12, tooltipY + 58)
       
-      // Percentage on the right
+      // Percentage on the right - MetaTrader Blue
       ctx.textAlign = "right"
-      ctx.fillStyle = d.percentage >= 0 ? "rgba(80, 180, 150, 0.8)" : "rgba(200, 100, 100, 0.8)"
+      ctx.fillStyle = d.percentage >= 0 ? `rgba(${MT_BLUE_RGB}, 0.85)` : "rgba(200, 100, 100, 0.8)"
       ctx.fillText(`${d.percentage >= 0 ? '+' : ''}${d.percentage.toFixed(2)}%`, tooltipX + tooltipWidth - 12, tooltipY + 58)
       
       // Draw pointer/arrow to point
@@ -407,33 +412,39 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
   }
 
   return (
-    <div className="bg-card border border-border/50 rounded-lg overflow-hidden">
-      {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-border/30">
-        <div className="flex items-start sm:items-center justify-between gap-2">
+    <div className="bg-card border border-border/40 rounded-md overflow-hidden">
+      {/* Header - Compact */}
+      <div className="p-3 sm:p-4 border-b border-border/20">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <h2 className="text-[12px] sm:text-sm font-bold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-foreground/90">
+            <h2 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-foreground/80">
               Rendimiento Semanal
             </h2>
-            <p className="text-[12px] sm:text-sm font-medium text-muted-foreground mt-0.5 sm:mt-1">
+            <p className="text-[10px] sm:text-xs font-medium text-muted-foreground/60 mt-0.5">
               {weekRange}
             </p>
           </div>
           <div className="text-right">
-            <p className={`text-lg sm:text-xl font-bold ${totalProfit >= 0 ? 'text-[oklch(0.70_0.16_145)]' : 'text-[oklch(0.70_0.16_25)]'}`}>
+            <p 
+              className="text-lg sm:text-xl font-bold"
+              style={{ color: totalProfit >= 0 ? 'rgb(65, 105, 225)' : 'rgb(220, 110, 110)' }}
+            >
               {totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}
             </p>
-            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <p 
+              className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider"
+              style={{ color: totalPercentage >= 0 ? 'rgba(65, 105, 225, 0.7)' : 'rgba(200, 100, 100, 0.7)' }}
+            >
               {totalPercentage >= 0 ? '+' : ''}{totalPercentage.toFixed(2)}% semana
             </p>
           </div>
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-        {/* Calendar Grid */}
+      <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+        {/* Daily Profit Grid - Square boxes, symmetric, MetaTrader Blue */}
         <div>
-          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {data.map((item, index) => {
               const isHovered = hoveredDay === index
               const hasProfit = item.profit !== 0
@@ -441,48 +452,52 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
               return (
                 <div 
                   key={item.day}
-                  className={`relative p-2 sm:p-3 rounded-md border transition-all duration-200 cursor-pointer ${
+                  className={`relative aspect-square flex flex-col items-center justify-center p-1.5 sm:p-2 rounded border transition-all duration-200 cursor-pointer ${
                     isHovered 
-                      ? 'border-[oklch(0.45_0.10_170)] bg-[oklch(0.15_0.02_170)]' 
-                      : 'border-border/30 bg-card/50 hover:border-border/50'
+                      ? 'border-[oklch(0.50_0.15_250)] bg-[oklch(0.14_0.03_250)]' 
+                      : 'border-border/30 bg-card/40 hover:border-border/50 hover:bg-card/60'
                   }`}
                   onMouseEnter={() => setHoveredDay(index)}
                   onMouseLeave={() => setHoveredDay(null)}
                 >
-                  {/* Day label */}
-                  <span className="block text-[9px] sm:text-xs font-bold uppercase tracking-wide text-foreground/70 mb-1 sm:mb-2">
+                  {/* Day label - centered */}
+                  <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wide text-muted-foreground/70 mb-0.5 sm:mb-1">
                     {item.shortDay}
                   </span>
                   
-                  {/* Profit value */}
-                  <p className={`text-[11px] sm:text-base font-bold tabular-nums ${
+                  {/* Profit value - MetaTrader Blue */}
+                  <p className={`text-[10px] sm:text-sm font-bold tabular-nums leading-none ${
                     !hasProfit 
-                      ? 'text-muted-foreground/40' 
+                      ? 'text-muted-foreground/30' 
                       : item.profit > 0 
-                        ? 'text-[oklch(0.68_0.14_145)]' 
-                        : 'text-[oklch(0.68_0.14_25)]'
-                  }`}>
-                    {!hasProfit ? '—' : `${item.profit > 0 ? '+' : ''}$${Math.abs(item.profit).toFixed(0)}`}
+                        ? `text-[${MT_BLUE}]` 
+                        : 'text-red-400'
+                  }`}
+                  style={hasProfit && item.profit > 0 ? { color: 'rgb(65, 105, 225)' } : undefined}
+                  >
+                    {!hasProfit ? '—' : `${item.profit > 0 ? '+' : ''}${Math.abs(item.profit).toFixed(0)}`}
                   </p>
                   
-                  {/* Percentage - Hidden on very small screens */}
+                  {/* Percentage - small, below profit */}
                   {hasProfit && (
-                    <p className={`hidden sm:block text-[10px] font-semibold tabular-nums mt-0.5 ${
+                    <p className={`text-[7px] sm:text-[8px] font-semibold tabular-nums mt-0.5 ${
                       item.percentage > 0 
-                        ? 'text-[oklch(0.60_0.10_145)]' 
-                        : 'text-[oklch(0.60_0.10_25)]'
-                    }`}>
-                      {item.percentage > 0 ? '+' : ''}{item.percentage.toFixed(2)}%
+                        ? 'text-[rgb(65,105,225)]/70' 
+                        : 'text-red-400/70'
+                    }`}
+                    style={item.percentage > 0 ? { color: 'rgba(65, 105, 225, 0.7)' } : undefined}
+                    >
+                      {item.percentage > 0 ? '+' : ''}{item.percentage.toFixed(1)}%
                     </p>
                   )}
                   
-                  {/* Status indicator */}
-                  <div className={`absolute top-1.5 sm:top-2 right-1.5 sm:right-2 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${
+                  {/* Status dot - top right corner */}
+                  <div className={`absolute top-1 right-1 w-1 h-1 rounded-full ${
                     !hasProfit 
-                      ? 'bg-muted-foreground/20' 
+                      ? 'bg-muted-foreground/15' 
                       : item.profit > 0 
-                        ? 'bg-[oklch(0.50_0.12_145)]' 
-                        : 'bg-[oklch(0.50_0.12_25)]'
+                        ? 'bg-[rgb(65,105,225)]' 
+                        : 'bg-red-400'
                   }`} />
                 </div>
               )
@@ -492,7 +507,7 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
 
         {/* Equity Curve Chart */}
         <div>
-          {/* Time range selector */}
+          {/* Time range selector - MetaTrader Blue accents */}
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.10em] sm:tracking-[0.12em] text-foreground/70">
               Curva de Rendimiento
@@ -507,7 +522,7 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
                   }}
                   className={`px-1.5 sm:px-2 py-1 text-[8px] sm:text-[9px] font-medium uppercase tracking-wider rounded transition-all duration-200 ${
                     selectedRange === range
-                      ? 'bg-[oklch(0.25_0.03_170)] text-[oklch(0.70_0.10_170)]'
+                      ? 'bg-[rgba(65,105,225,0.15)] text-[rgb(100,140,255)]'
                       : 'text-muted-foreground/40 hover:text-muted-foreground/60'
                   }`}
                 >
@@ -517,8 +532,8 @@ export function WeeklyPerformance({ data, weekRange, totalProfit, totalPercentag
             </div>
           </div>
           
-          {/* Chart canvas */}
-          <div className="relative h-40 sm:h-48 bg-[oklch(0.10_0.01_240)] rounded-md border border-border/20">
+          {/* Chart canvas - MetaTrader style background */}
+          <div className="relative h-32 sm:h-40 bg-[oklch(0.09_0.01_250)] rounded border border-border/20">
             <canvas
               ref={canvasRef}
               className="w-full h-full cursor-crosshair"
