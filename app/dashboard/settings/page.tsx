@@ -15,8 +15,11 @@ import {
   Link2,
   Eye,
   EyeOff,
-  AlertCircle
+  AlertCircle,
+  ArrowRight,
+  Clock
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -40,6 +43,14 @@ const TIMEZONES = [
   { value: "America/Sao_Paulo", label: "UTC-3 (Sao Paulo)" },
   { value: "Europe/Madrid", label: "UTC+1 (Madrid)" },
   { value: "Europe/London", label: "UTC+0 (Londres)" },
+]
+
+// MT5 Deriv Servers
+const MT5_SERVERS = [
+  { value: "Deriv-Demo", label: "Deriv-Demo" },
+  { value: "Deriv-Server", label: "Deriv-Server" },
+  { value: "Deriv-Server-02", label: "Deriv-Server-02" },
+  { value: "Deriv-Server-03", label: "Deriv-Server-03" },
 ]
 
 export default function SettingsPage() {
@@ -68,6 +79,7 @@ export default function SettingsPage() {
   const [mt5ErrorMessage, setMt5ErrorMessage] = useState("")
 
   const supabase = createClient()
+  const router = useRouter()
 
   // Load user data on mount
   useEffect(() => {
@@ -350,41 +362,60 @@ export default function SettingsPage() {
           animationDelay={50}
         >
           <div className="w-full space-y-4">
-            {/* Connection Status */}
-            <div className={`flex items-center gap-2 px-3 py-2 rounded border ${
+            {/* Connection Status Banner */}
+            <div className={`flex items-start gap-3 px-4 py-3 rounded-md border ${
               mt5Status === "connected" 
                 ? "bg-[oklch(0.14_0.03_145)] border-[oklch(0.24_0.05_145)]"
                 : mt5Status === "pending"
-                  ? "bg-[oklch(0.14_0.03_220)] border-[oklch(0.24_0.05_220)]"
+                  ? "bg-[oklch(0.14_0.03_60)] border-[oklch(0.24_0.05_60)]"
                   : mt5Status === "error"
                     ? "bg-[oklch(0.14_0.03_25)] border-[oklch(0.24_0.05_25)]"
                     : "bg-muted/20 border-border/30"
             }`}>
-              <span className={`relative flex h-2 w-2 flex-shrink-0`}>
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${
+              <span className={`relative flex h-2.5 w-2.5 flex-shrink-0 mt-0.5`}>
+                {mt5Status === "pending" && (
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[oklch(0.65_0.14_60)] opacity-50 animate-ping" />
+                )}
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
                   mt5Status === "connected" 
-                    ? "bg-[oklch(0.55_0.14_145)] animate-status-active"
+                    ? "bg-[oklch(0.55_0.14_145)]"
                     : mt5Status === "pending"
-                      ? "bg-[oklch(0.55_0.14_220)] animate-pulse"
+                      ? "bg-[oklch(0.65_0.14_60)]"
                       : mt5Status === "error"
                         ? "bg-[oklch(0.55_0.14_25)]"
                         : "bg-muted-foreground/30"
                 }`} />
               </span>
-              <span className={`text-[10px] sm:text-xs font-medium ${
-                mt5Status === "connected" 
-                  ? "text-[oklch(0.65_0.10_145)]"
-                  : mt5Status === "pending"
-                    ? "text-[oklch(0.65_0.10_220)]"
-                    : mt5Status === "error"
-                      ? "text-[oklch(0.65_0.10_25)]"
-                      : "text-muted-foreground/60"
-              }`}>
-                {mt5Status === "connected" && "Conectado y operando"}
-                {mt5Status === "pending" && "Pendiente de verificacion"}
-                {mt5Status === "error" && "Error de conexion"}
-                {mt5Status === "disconnected" && "Sin configurar"}
-              </span>
+              <div className="flex-1">
+                <p className={`text-xs sm:text-sm font-semibold ${
+                  mt5Status === "connected" 
+                    ? "text-[oklch(0.70_0.12_145)]"
+                    : mt5Status === "pending"
+                      ? "text-[oklch(0.75_0.12_60)]"
+                      : mt5Status === "error"
+                        ? "text-[oklch(0.70_0.12_25)]"
+                        : "text-muted-foreground"
+                }`}>
+                  {mt5Status === "connected" && "Cuenta Validada"}
+                  {mt5Status === "pending" && "En Revision"}
+                  {mt5Status === "error" && "Error de Conexion"}
+                  {mt5Status === "disconnected" && "Sin Configurar"}
+                </p>
+                <p className={`text-[10px] sm:text-xs mt-0.5 ${
+                  mt5Status === "connected" 
+                    ? "text-[oklch(0.60_0.08_145)]"
+                    : mt5Status === "pending"
+                      ? "text-[oklch(0.65_0.08_60)]"
+                      : mt5Status === "error"
+                        ? "text-[oklch(0.60_0.08_25)]"
+                        : "text-muted-foreground/60"
+                }`}>
+                  {mt5Status === "connected" && "Configura tu operativa para comenzar a operar."}
+                  {mt5Status === "pending" && "Estamos validando tu cuenta. Este proceso puede tardar unos minutos."}
+                  {mt5Status === "error" && "Error de conexion. Revisa tus datos o contacta soporte."}
+                  {mt5Status === "disconnected" && "Introduce tus credenciales MT5 para conectar tu cuenta."}
+                </p>
+              </div>
             </div>
 
             {/* Success/Error Messages */}
@@ -401,88 +432,126 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* MT5 Fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Account Number */}
-              <div className="space-y-1.5">
-                <Label className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Numero de Cuenta
-                </Label>
-                <Input 
-                  value={mt5Account}
-                  onChange={(e) => setMt5Account(e.target.value)}
-                  placeholder="123456789"
-                  disabled={isLoading || mt5Status === "connected"}
-                  className="h-10 sm:h-11 bg-muted/20 border-border/40 text-foreground text-sm placeholder:text-muted-foreground/40"
-                />
-              </div>
-              
-              {/* Password */}
-              <div className="space-y-1.5">
-                <Label className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Contrasena Investor
-                </Label>
-                <div className="relative">
-                  <Input 
-                    type={showPassword ? "text" : "password"}
-                    value={mt5Password}
-                    onChange={(e) => setMt5Password(e.target.value)}
-                    placeholder={mt5Status !== "disconnected" ? "••••••••" : "Solo lectura"}
-                    disabled={isLoading || mt5Status === "connected"}
-                    className="h-10 sm:h-11 bg-muted/20 border-border/40 text-foreground text-sm placeholder:text-muted-foreground/40 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground"
+            {/* MT5 Fields - Only show if not connected */}
+            {mt5Status !== "connected" && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Account Number */}
+                  <div className="space-y-1.5">
+                    <Label className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Account ID MT5
+                    </Label>
+                    <Input 
+                      value={mt5Account}
+                      onChange={(e) => setMt5Account(e.target.value)}
+                      placeholder="123456789"
+                      disabled={isLoading}
+                      className="h-10 sm:h-11 bg-muted/20 border-border/40 text-foreground text-sm placeholder:text-muted-foreground/40"
+                    />
+                  </div>
+                  
+                  {/* Server Selector */}
+                  <div className="space-y-1.5">
+                    <Label className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Servidor
+                    </Label>
+                    <select
+                      value={mt5Server}
+                      onChange={(e) => setMt5Server(e.target.value)}
+                      disabled={isLoading}
+                      className="w-full h-10 sm:h-11 px-3 bg-muted/20 border border-border/40 rounded-md text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-border"
+                    >
+                      <option value="" className="bg-card text-muted-foreground">Seleccionar servidor</option>
+                      {MT5_SERVERS.map((server) => (
+                        <option key={server.value} value={server.value} className="bg-card text-foreground">
+                          {server.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {/* Password */}
+                  <div className="space-y-1.5">
+                    <Label className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Contrasena MT5
+                    </Label>
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? "text" : "password"}
+                        value={mt5Password}
+                        onChange={(e) => setMt5Password(e.target.value)}
+                        placeholder="Contrasena investor"
+                        disabled={isLoading}
+                        className="h-10 sm:h-11 bg-muted/20 border-border/40 text-foreground text-sm placeholder:text-muted-foreground/40 pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info text */}
+                <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                  Usa la contrasena de <span className="font-medium text-muted-foreground">solo lectura (investor)</span> de tu cuenta MT5 Deriv. 
+                  El sistema solo necesita acceso de lectura para sincronizar operaciones.
+                </p>
+
+                {/* Submit Button */}
+                <div className="pt-1">
+                  <Button
+                    onClick={handleSaveMt5}
+                    disabled={isLoading || isSavingMt5 || !mt5Account || !mt5Password || !mt5Server}
+                    className="w-full sm:w-auto h-10 sm:h-11 px-6 bg-foreground/90 hover:bg-foreground text-background font-medium text-xs sm:text-sm uppercase tracking-wider disabled:opacity-40"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                    {isSavingMt5 ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : mt5Status === "pending" ? (
+                      "Actualizar Datos"
+                    ) : (
+                      "Enviar para Validacion"
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Connected State - Show "Siguiente" button */}
+            {mt5Status === "connected" && (
+              <div className="pt-2">
+                <Button
+                  onClick={() => router.push("/dashboard")}
+                  className="w-full sm:w-auto h-11 sm:h-12 px-8 bg-[oklch(0.50_0.14_145)] hover:bg-[oklch(0.55_0.16_145)] text-white font-semibold text-sm uppercase tracking-wider"
+                >
+                  Siguiente
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                <p className="text-[10px] text-muted-foreground/50 mt-2">
+                  Ir a configurar tu operativa diaria
+                </p>
+              </div>
+            )}
+
+            {/* Account info when connected or pending */}
+            {(mt5Status === "connected" || mt5Status === "pending") && mt5Account && (
+              <div className="flex items-center gap-4 pt-2 border-t border-border/20">
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60">Cuenta</p>
+                  <p className="text-sm font-medium text-foreground">{mt5Account}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60">Servidor</p>
+                  <p className="text-sm font-medium text-foreground">{mt5Server}</p>
                 </div>
               </div>
-              
-              {/* Server */}
-              <div className="space-y-1.5">
-                <Label className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Servidor MT5
-                </Label>
-                <Input 
-                  value={mt5Server}
-                  onChange={(e) => setMt5Server(e.target.value)}
-                  placeholder="Deriv-Server"
-                  disabled={isLoading || mt5Status === "connected"}
-                  className="h-10 sm:h-11 bg-muted/20 border-border/40 text-foreground text-sm placeholder:text-muted-foreground/40"
-                />
-              </div>
-            </div>
-
-            {/* Info text */}
-            <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-              Usa la contrasena de <span className="font-medium text-muted-foreground">solo lectura (investor)</span> de tu cuenta MT5. 
-              El bot solo necesita acceso de lectura para monitorear operaciones.
-            </p>
-
-            {/* Save Button */}
-            <div className="pt-1">
-              <Button
-                onClick={handleSaveMt5}
-                disabled={isLoading || isSavingMt5 || mt5Status === "connected" || (!mt5Account || !mt5Password || !mt5Server)}
-                className="w-full sm:w-auto h-10 sm:h-11 px-6 bg-[oklch(0.45_0.12_220)] hover:bg-[oklch(0.50_0.14_220)] text-white font-medium text-xs sm:text-sm uppercase tracking-wider disabled:opacity-40"
-              >
-                {isSavingMt5 ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Enviando...
-                  </>
-                ) : mt5Status === "connected" ? (
-                  "Conectado"
-                ) : mt5Status === "pending" ? (
-                  "Actualizar Credenciales"
-                ) : (
-                  "Conectar Cuenta MT5"
-                )}
-              </Button>
-            </div>
+            )}
           </div>
         </MetricCard>
 
