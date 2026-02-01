@@ -210,7 +210,7 @@ export default function LandingPage() {
                 <button 
                   className="btn-glass-institutional h-14 px-10 rounded-lg font-semibold uppercase tracking-[0.15em] text-[13px] text-white/90 flex items-center justify-center gap-3 group"
                 >
-                  <span className="relative z-10">Acceder al Terminal</span>
+                  <span className="relative z-10">ACCEDER A LA ZONA</span>
                   <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
                 </button>
               </Link>
