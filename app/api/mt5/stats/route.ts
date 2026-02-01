@@ -1,56 +1,62 @@
+// app/api/mt5/stats/route.ts
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    // 1️⃣ Últimas operaciones reales del bot
-    const { data: trades, error: tradesError } = await supabase
+    // 1️⃣ Verifica variables de entorno
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return Response.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    // 2️⃣ Inicializa Supabase SOLO en runtime
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // 3️⃣ Consulta últimas operaciones
+    const { data, error } = await supabase
       .from('trades')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(100);
 
-    if (tradesError) throw tradesError;
+    if (error) {
+      return Response.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
 
-    // 2️⃣ Cálculos reales
-    const totalProfit = trades.reduce(
-      (acc, t) => acc + Number(t.profit || 0),
+    // 4️⃣ Calcula stats básicas
+    const totalTrades = data.length;
+    const totalProfit = data.reduce(
+      (sum, t) => sum + (t.profit || 0),
+      0
+    );
+    const totalLots = data.reduce(
+      (sum, t) => sum + (t.lot || 0),
       0
     );
 
-    const totalLots = trades.reduce(
-      (acc, t) => acc + Number(t.lot || 0),
-      0
-    );
+    return Response.json({
+      success: true,
+      stats: {
+        total_trades: totalTrades,
+        total_profit: totalProfit,
+        total_lots: totalLots,
+        trades: data
+      }
+    });
 
-    const totalOperations = trades.length;
-
-    // 3️⃣ Último estado (último webhook recibido)
-    const lastTrade = trades[0] || null;
-
-    return new Response(
-      JSON.stringify({
-        status: 'ok',
-        summary: {
-          total_profit: Number(totalProfit.toFixed(2)),
-          total_lot: Number(totalLots.toFixed(2)),
-          total_operations: totalOperations,
-        },
-        last_trade: lastTrade,
-        trades,
-      }),
-      { status: 200 }
-    );
-  } catch (err) {
-    console.error(err);
-    return new Response(
-      JSON.stringify({ error: 'Failed to fetch MT5 stats' }),
+  } catch (err: any) {
+    return Response.json(
+      { error: err.message || 'Internal server error' },
       { status: 500 }
     );
   }
 }
-// redeploy
+
