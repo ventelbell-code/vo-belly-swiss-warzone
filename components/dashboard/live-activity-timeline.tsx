@@ -89,82 +89,78 @@ export function LiveActivityTimeline() {
   }, [nextId])
 
   return (
-    <div className="bg-card border border-border/50 rounded-lg p-4 sm:p-5">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5 flex-shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[oklch(0.60_0.16_145)] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-[oklch(0.60_0.16_145)]" />
+    <div className="bg-card border border-border/40 rounded-md p-3 sm:p-4 h-full flex flex-col">
+      {/* Header - Compact */}
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2 flex-shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[oklch(0.55_0.14_145)] opacity-60" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.55_0.14_145)]" />
           </span>
-          <h2 className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-foreground/80">
-            Actividad en Vivo
+          <h2 className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/70">
+            Actividad
           </h2>
         </div>
-        <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60">
           BOOM 1000
         </span>
       </div>
 
-      {/* Timeline */}
-      <div className="relative">
+      {/* Timeline - Flex grow to fill space */}
+      <div className="relative flex-1 overflow-hidden">
         {/* Linea vertical */}
-        <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border/30" />
+        <div className="absolute left-[5px] top-1 bottom-1 w-px bg-border/20" />
 
-        {/* Actividades */}
-        <div className="space-y-0.5 sm:space-y-1">
+        {/* Actividades - Compact list */}
+        <div className="space-y-0.5">
           {activities.map((activity, index) => (
             <div
               key={activity.id}
-              className={`relative flex items-center gap-2 sm:gap-3 py-2 sm:py-2 px-1.5 sm:px-2 rounded transition-all duration-300 cursor-default ${
+              className={`relative flex items-center gap-2 py-1.5 px-1 rounded transition-all duration-200 cursor-default ${
                 activity.isNew 
-                  ? 'bg-muted/20 animate-fade-in' 
+                  ? 'bg-muted/15 animate-fade-in' 
                   : 'hover:bg-muted/10'
               }`}
               onMouseEnter={() => setHoveredId(activity.id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              {/* Punto con animacion */}
+              {/* Punto - Compact */}
               <div className="relative z-10 flex-shrink-0">
-                <span className="relative flex h-4 w-4 items-center justify-center">
-                  {/* Pulse para operaciones nuevas positivas */}
-                  {activity.isNew && activity.profit > 0 && (
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-[oklch(0.55_0.15_145)] opacity-50 animate-ping" />
+                <span className="relative flex h-3 w-3 items-center justify-center">
+                  {activity.isNew && (
+                    <span className={`absolute inline-flex h-full w-full rounded-full opacity-40 animate-ping ${
+                      activity.profit > 0 ? 'bg-[oklch(0.50_0.12_145)]' : 'bg-[oklch(0.50_0.12_25)]'
+                    }`} />
                   )}
-                  {/* Pulse para operaciones nuevas negativas */}
-                  {activity.isNew && activity.profit < 0 && (
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-[oklch(0.55_0.15_25)] opacity-50 animate-ping" />
-                  )}
-                  {/* Punto principal */}
-                  <span className={`relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 transition-transform duration-300 ${
+                  <span className={`relative inline-flex rounded-full h-1.5 w-1.5 transition-transform duration-200 ${
                     activity.profit >= 0 
-                      ? 'bg-[oklch(0.55_0.15_145)]' 
-                      : 'bg-[oklch(0.55_0.15_25)]'
-                  } ${activity.isNew ? 'scale-125' : ''} ${hoveredId === activity.id ? 'scale-150' : ''}`} />
+                      ? 'bg-[oklch(0.50_0.12_145)]' 
+                      : 'bg-[oklch(0.50_0.12_25)]'
+                  } ${activity.isNew ? 'scale-125' : ''}`} />
                 </span>
               </div>
 
-              {/* Contenido */}
-              <div className="flex-1 flex items-center justify-between min-w-0 gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className={`text-[13px] sm:text-sm font-bold tabular-nums ${
+              {/* Contenido - Compact */}
+              <div className="flex-1 flex items-center justify-between min-w-0 gap-1">
+                <div className="flex items-center gap-1 min-w-0">
+                  <span className={`text-[11px] sm:text-xs font-bold tabular-nums ${
                     activity.profit >= 0 
-                      ? 'text-[oklch(0.68_0.14_145)]' 
-                      : 'text-[oklch(0.68_0.14_25)]'
+                      ? 'text-[oklch(0.60_0.12_145)]' 
+                      : 'text-[oklch(0.60_0.12_25)]'
                   }`}>
-                    {activity.profit >= 0 ? '+' : ''}${activity.profit.toFixed(2)}
+                    {activity.profit >= 0 ? '+' : ''}${activity.profit.toFixed(0)}
                   </span>
-                  <span className={`text-[8px] sm:text-[9px] font-semibold uppercase tracking-wider px-1 sm:px-1.5 py-0.5 rounded ${
+                  <span className={`text-[7px] sm:text-[8px] font-semibold uppercase tracking-wide px-1 py-0.5 rounded ${
                     activity.opType === 'Scalp' 
-                      ? 'bg-[oklch(0.20_0.04_220)] text-[oklch(0.70_0.10_220)]'
+                      ? 'bg-[oklch(0.18_0.03_220)] text-[oklch(0.60_0.08_220)]'
                       : activity.opType === 'Expansion'
-                        ? 'bg-[oklch(0.20_0.04_145)] text-[oklch(0.70_0.10_145)]'
-                        : 'bg-[oklch(0.20_0.04_60)] text-[oklch(0.70_0.10_60)]'
+                        ? 'bg-[oklch(0.18_0.03_145)] text-[oklch(0.60_0.08_145)]'
+                        : 'bg-[oklch(0.18_0.03_60)] text-[oklch(0.60_0.08_60)]'
                   }`}>
-                    {activity.opType}
+                    {activity.opType.slice(0, 3)}
                   </span>
                 </div>
-                <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground tabular-nums flex-shrink-0">
+                <span className="text-[8px] sm:text-[9px] font-medium text-muted-foreground/50 tabular-nums flex-shrink-0">
                   {formatRelativeTime(activity.timestamp)}
                 </span>
               </div>
@@ -223,10 +219,10 @@ export function LiveActivityTimeline() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-border/30">
-        <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground text-center">
-          Opera en indices sinteticos
+      {/* Footer - Minimal */}
+      <div className="mt-2 pt-2 border-t border-border/20">
+        <p className="text-[8px] sm:text-[9px] font-medium text-muted-foreground/50 text-center">
+          Indices sinteticos
         </p>
       </div>
     </div>

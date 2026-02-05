@@ -341,43 +341,43 @@ export function DailyControlPanel() {
   }
 
   return (
-    <div className="bg-card border border-border/50 rounded-lg overflow-hidden">
-      {/* Header */}
-      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border/30">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Settings className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            <h2 className="text-[12px] sm:text-sm font-bold uppercase tracking-[0.10em] sm:tracking-[0.12em] text-foreground/90">
+    <div className="bg-card border border-border/40 rounded-md overflow-hidden">
+      {/* Header - Compact */}
+      <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-b border-border/20">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Settings className="w-3.5 h-3.5 text-muted-foreground/60 flex-shrink-0" />
+            <h2 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] text-foreground/80">
               Control de Operativa
             </h2>
           </div>
-          {/* Status Indicator */}
-          <div className={`flex items-center gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full self-start sm:self-auto ${
+          {/* Status Indicator - Compact */}
+          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${
             isLimitReached 
-              ? 'bg-[oklch(0.18_0.04_85)]' 
-              : 'bg-[oklch(0.18_0.04_145)]'
+              ? 'bg-[oklch(0.15_0.03_85)]' 
+              : 'bg-[oklch(0.15_0.03_145)]'
           }`}>
-            <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5 flex-shrink-0">
-              <span className={`relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 ${
+            <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+              <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${
                 isLimitReached 
-                  ? 'bg-[oklch(0.72_0.14_85)] animate-status-pending' 
-                  : 'bg-[oklch(0.60_0.16_145)] animate-status-active'
+                  ? 'bg-[oklch(0.68_0.12_85)] animate-status-pending' 
+                  : 'bg-[oklch(0.55_0.14_145)] animate-status-active'
               }`} />
             </span>
-            <span className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${
+            <span className={`text-[8px] sm:text-[9px] font-semibold uppercase tracking-wider ${
               isLimitReached 
-                ? 'text-[oklch(0.75_0.10_85)]' 
-                : 'text-[oklch(0.65_0.12_145)]'
+                ? 'text-[oklch(0.70_0.08_85)]' 
+                : 'text-[oklch(0.60_0.10_145)]'
             }`}>
-              {isLimitReached ? 'En Pausa' : 'Operando'}
+              {isLimitReached ? 'Pausa' : 'Activo'}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-        {/* Dial Controls */}
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+      <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+        {/* Dial Controls - Compact */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {/* Lot Size Dial */}
           <CircularDial
             value={state.lotSize}
@@ -399,67 +399,52 @@ export function DailyControlPanel() {
           />
         </div>
 
-        {/* Dynamic Information */}
-        <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-border/30">
-          {/* Profit Per Operation */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 px-3 sm:px-5 py-3 sm:py-4 bg-[oklch(0.13_0.02_145)] border border-[oklch(0.22_0.05_145)] rounded-lg">
-            <span className="text-[11px] sm:text-xs font-medium text-muted-foreground">
-              Cada operacion cierra en
-            </span>
-            <span className="text-[15px] sm:text-base font-bold text-[oklch(0.70_0.14_145)] tabular-nums">
-              ≈ $<AnimatedCounter value={selectedLot.profit} /> USD
+        {/* Dynamic Information - Compact grid */}
+        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/20">
+          {/* Profit Per Op */}
+          <div className="text-center p-2 bg-[oklch(0.12_0.02_145)] border border-[oklch(0.20_0.04_145)] rounded">
+            <p className="text-[8px] font-medium text-muted-foreground/70 uppercase tracking-wide mb-0.5">c/Op</p>
+            <span className="text-sm font-bold text-[oklch(0.60_0.12_145)] tabular-nums">
+              $<AnimatedCounter value={selectedLot.profit} />
             </span>
           </div>
 
           {/* Daily Goal */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 px-3 sm:px-5 py-3 sm:py-4 bg-[oklch(0.13_0.02_220)] border border-[oklch(0.22_0.05_220)] rounded-lg">
-            <div className="flex items-center gap-2">
-              <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[oklch(0.65_0.12_220)] flex-shrink-0" />
-              <span className="text-[11px] sm:text-xs font-medium text-muted-foreground">Objetivo diario</span>
-            </div>
-            <span className="text-[15px] sm:text-base font-bold text-[oklch(0.70_0.14_220)] tabular-nums">
-              $<AnimatedCounter value={estimatedDailyProfit} /> USD
+          <div className="text-center p-2 bg-[oklch(0.12_0.02_220)] border border-[oklch(0.20_0.04_220)] rounded">
+            <p className="text-[8px] font-medium text-muted-foreground/70 uppercase tracking-wide mb-0.5">Objetivo</p>
+            <span className="text-sm font-bold text-[oklch(0.60_0.12_220)] tabular-nums">
+              $<AnimatedCounter value={estimatedDailyProfit} />
             </span>
           </div>
 
-          {/* Remaining Operations */}
-          <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 px-3 sm:px-5 py-3 sm:py-4 rounded-lg border ${
+          {/* Remaining */}
+          <div className={`text-center p-2 rounded border ${
             isLimitReached 
-              ? 'bg-[oklch(0.13_0.02_85)] border-[oklch(0.22_0.05_85)]' 
-              : 'bg-muted/15 border-border/30'
+              ? 'bg-[oklch(0.12_0.02_85)] border-[oklch(0.20_0.04_85)]' 
+              : 'bg-muted/10 border-border/20'
           }`}>
-            <div className="flex items-center gap-2">
-              <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
-              <span className="text-[11px] sm:text-xs font-medium text-muted-foreground">Operaciones restantes</span>
-            </div>
-            <span className={`text-[15px] sm:text-base font-bold tabular-nums ${
+            <p className="text-[8px] font-medium text-muted-foreground/70 uppercase tracking-wide mb-0.5">Restantes</p>
+            <span className={`text-sm font-bold tabular-nums ${
               isLimitReached 
-                ? 'text-[oklch(0.75_0.12_85)]' 
-                : remainingOps <= 5 
-                  ? 'text-[oklch(0.75_0.12_60)]' 
-                  : 'text-foreground'
+                ? 'text-[oklch(0.68_0.10_85)]' 
+                : 'text-foreground/80'
             }`}>
-              {remainingOps} de {state.dailyLimit}
+              {remainingOps}/{state.dailyLimit}
             </span>
           </div>
-
-          {/* Status Message */}
-          {isLimitReached && (
-            <div className="flex items-center gap-2.5 sm:gap-3 px-3 sm:px-5 py-3 sm:py-4 bg-[oklch(0.15_0.02_85)] border border-[oklch(0.24_0.05_85)] rounded-lg">
-              <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0">
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-[oklch(0.70_0.12_85)] animate-status-pending" />
-              </span>
-              <p className="text-[12px] sm:text-sm font-semibold text-[oklch(0.75_0.08_85)]">
-                Objetivo Alcanzado — Pausa hasta manana
-              </p>
-            </div>
-          )}
         </div>
 
-        {/* Disclaimer */}
-        <p className="text-[9px] sm:text-[10px] font-medium text-muted-foreground text-center pt-1 sm:pt-2">
-          La configuracion se guarda automaticamente.
-        </p>
+        {/* Status Message - Only if limit reached */}
+        {isLimitReached && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-[oklch(0.12_0.02_85)] border border-[oklch(0.20_0.04_85)] rounded">
+            <span className="relative flex h-2 w-2 flex-shrink-0">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[oklch(0.68_0.10_85)] animate-status-pending" />
+            </span>
+            <p className="text-[10px] font-medium text-[oklch(0.68_0.06_85)]">
+              Objetivo alcanzado - Pausa hasta manana
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

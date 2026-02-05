@@ -99,21 +99,21 @@ export function ProfitBag({
   }, [])
 
   return (
-    <div className="bg-card border border-border/50 rounded-lg p-4 sm:p-5">
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h2 className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.12em] sm:tracking-[0.15em] text-foreground/80">
-          Bolsa de Beneficio
+    <div className="bg-card border border-border/40 rounded-md p-3 sm:p-4 flex flex-col">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          Beneficio
         </h2>
-        <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Acumulado
+        <span className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60">
+          Acum.
         </span>
       </div>
 
       {/* Bag Container */}
-      <div className="flex flex-col items-center">
+      <div className="flex-1 flex flex-col items-center justify-center">
         {/* Bag Visual */}
         <div 
-          className="relative w-20 h-24 sm:w-24 sm:h-28 cursor-pointer group"
+          className="relative w-16 h-20 sm:w-18 sm:h-22 cursor-pointer group"
           onClick={simulateOperation}
           title="Click para simular operacion"
         >
@@ -234,12 +234,12 @@ export function ProfitBag({
         </div>
 
         {/* Total Display */}
-        <div className="text-center mt-3 sm:mt-4">
-          <p className="text-xl sm:text-2xl font-bold text-[oklch(0.70_0.14_145)] tabular-nums">
-            ${displayedProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        <div className="text-center mt-2">
+          <p className="text-lg sm:text-xl font-bold text-[oklch(0.65_0.12_145)] tabular-nums">
+            ${displayedProfit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
-          <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-1">
-            Beneficio Acumulado
+          <p className="text-[8px] sm:text-[9px] font-medium uppercase tracking-wider text-muted-foreground/60 mt-0.5">
+            Total
           </p>
         </div>
       </div>

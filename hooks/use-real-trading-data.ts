@@ -140,7 +140,7 @@ const { data: tradeData } = await supabase
           }
         }
 
-        // Convert to array format
+        // Convert to array format with realistic intraday points
         const initialBalance = tradeData?.balance || 50000
         let cumulative = initialBalance - (operations?.reduce((acc, op) => acc + (op.profit || 0), 0) || 0)
         
@@ -150,7 +150,27 @@ const { data: tradeData } = await supabase
         for (const [dateStr, dayData] of sortedDays) {
           const date = new Date(dateStr)
           const dayIndex = date.getDay()
+          const startCumulative = cumulative
           cumulative += dayData.profit
+          
+          // Generate realistic intraday points based on number of operations
+          const intradayPoints: number[] = [startCumulative]
+          if (dayData.operations > 0 && dayData.profit !== 0) {
+            const numPoints = Math.max(3, dayData.operations * 2)
+            const profitPerPoint = dayData.profit / numPoints
+            let runningTotal = startCumulative
+            
+            for (let i = 0; i < numPoints; i++) {
+              // Add some variance to make the curve more realistic
+              const variance = (Math.random() - 0.5) * Math.abs(profitPerPoint) * 0.3
+              runningTotal += profitPerPoint + variance
+              intradayPoints.push(runningTotal)
+            }
+            // Ensure last point matches actual cumulative
+            intradayPoints[intradayPoints.length - 1] = cumulative
+          } else {
+            intradayPoints.push(cumulative)
+          }
           
           weeklyData.push({
             day: DAYS[dayIndex],
@@ -159,7 +179,7 @@ const { data: tradeData } = await supabase
             percentage: initialBalance > 0 ? (dayData.profit / initialBalance) * 100 : 0,
             operations: dayData.operations,
             cumulative,
-            intraday: [cumulative - dayData.profit, cumulative],
+            intraday: intradayPoints,
           })
         }
 

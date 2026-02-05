@@ -74,20 +74,20 @@ export default function LoginPage() {
           }}
         />
         
-        <CardContent className="p-10 space-y-10 relative z-10">
+        <CardContent className="p-6 sm:p-10 space-y-6 sm:space-y-10 relative z-10">
           {/* Logo */}
           <div className="flex justify-center">
-            <AnimatedLogo size="xl" />
+            <AnimatedLogo size="lg" className="sm:w-80" />
           </div>
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2.5">
+          <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
+            <div className="space-y-2">
               <Label 
                 htmlFor="email" 
-                className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground/80"
+                className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground/80"
               >
-                Correo Electrónico
+                Correo Electronico
               </Label>
               <div className="relative group">
                 <Input
@@ -96,7 +96,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="usuario@bellyswiss.com"
-                  className="bg-white/[0.03] border border-white/[0.08] focus:border-white/20 focus:bg-white/[0.05] h-13 text-foreground placeholder:text-muted-foreground/40 transition-all duration-500 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] rounded-md"
+                  className="bg-white/[0.03] border border-white/[0.08] focus:border-white/20 focus:bg-white/[0.05] h-11 sm:h-12 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/40 transition-all duration-500 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] rounded-md px-3 sm:px-4"
                   required
                 />
                 {/* Focus glow effect */}
@@ -104,12 +104,12 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <Label 
                 htmlFor="password" 
-                className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground/80"
+                className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.15em] text-muted-foreground/80"
               >
-                Contraseña
+                Contrasena
               </Label>
               <div className="relative group">
                 <Input
@@ -118,7 +118,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="bg-white/[0.03] border border-white/[0.08] focus:border-white/20 focus:bg-white/[0.05] h-13 text-foreground placeholder:text-muted-foreground/40 transition-all duration-500 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] rounded-md"
+                  className="bg-white/[0.03] border border-white/[0.08] focus:border-white/20 focus:bg-white/[0.05] h-11 sm:h-12 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/40 transition-all duration-500 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] rounded-md px-3 sm:px-4"
                   required
                 />
                 {/* Focus glow effect */}
@@ -126,11 +126,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-1 sm:pt-2">
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-14 bg-gradient-to-b from-white/95 to-white/85 text-[oklch(0.08_0.005_260)] hover:from-white hover:to-white/95 font-semibold uppercase tracking-[0.2em] text-[13px] transition-all duration-500 relative overflow-hidden group shadow-[0_4px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.5)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.15),inset_0_1px_0_rgba(255,255,255,0.5)] rounded-md"
+                className="w-full h-12 sm:h-14 bg-gradient-to-b from-white/95 to-white/85 text-[oklch(0.08_0.005_260)] hover:from-white hover:to-white/95 font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[12px] sm:text-[13px] transition-all duration-500 relative overflow-hidden group shadow-[0_4px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.5)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.15),inset_0_1px_0_rgba(255,255,255,0.5)] rounded-md"
               >
                 <span className={`relative z-10 ${isLoading ? "opacity-0" : "opacity-100"}`}>
                   ACCEDER AL TERMINAL
@@ -147,8 +147,8 @@ export default function LoginPage() {
           </form>
 
           {/* Footer text */}
-          <div className="text-center pt-2">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/50 font-medium">
+          <div className="text-center pt-1 sm:pt-2">
+            <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-muted-foreground/50 font-medium">
               Acceso institucional restringido
             </p>
           </div>
@@ -156,8 +156,8 @@ export default function LoginPage() {
       </Card>
 
       {/* Bottom branding */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <p className="text-[9px] uppercase tracking-[0.35em] text-muted-foreground/25 font-medium">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 px-4">
+        <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.35em] text-muted-foreground/25 font-medium text-center">
           Sistema de monitoreo de rendimiento
         </p>
       </div>

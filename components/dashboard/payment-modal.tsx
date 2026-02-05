@@ -44,17 +44,17 @@ export function PaymentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm bg-card border-border p-0 gap-0">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-sm mx-auto bg-card border-border p-0 gap-0 rounded-lg">
         {/* Header */}
-        <DialogHeader className="px-5 pt-5 pb-3">
-          <DialogTitle className="text-base font-medium text-foreground">
+        <DialogHeader className="px-4 sm:px-5 pt-4 sm:pt-5 pb-2 sm:pb-3">
+          <DialogTitle className="text-sm sm:text-base font-medium text-foreground">
             Pago del servicio
           </DialogTitle>
         </DialogHeader>
 
         {/* Pending Amount */}
-        <div className="px-5 pb-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="px-4 sm:px-5 pb-3 sm:pb-4">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Monto pendiente:{" "}
             <span className="font-semibold text-amber-400">
               ${pendingAmount.toFixed(2)} USDT
@@ -67,23 +67,23 @@ export function PaymentModal({
           <TabsList className="w-full rounded-none border-b border-border bg-transparent h-auto p-0">
             <TabsTrigger
               value="usdt"
-              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground py-2.5 text-xs font-medium"
+              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground py-2 sm:py-2.5 text-[11px] sm:text-xs font-medium"
             >
               USDT TRC20
             </TabsTrigger>
             <TabsTrigger
               value="paypal"
-              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground py-2.5 text-xs font-medium"
+              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent data-[state=active]:text-foreground py-2 sm:py-2.5 text-[11px] sm:text-xs font-medium"
             >
               PayPal
             </TabsTrigger>
           </TabsList>
 
           {/* USDT Tab */}
-          <TabsContent value="usdt" className="mt-0 p-5 space-y-4">
-            {/* QR Code - 25% smaller, centered, no shadows */}
+          <TabsContent value="usdt" className="mt-0 p-4 sm:p-5 space-y-3 sm:space-y-4">
+            {/* QR Code - responsive size */}
             <div className="flex justify-center">
-              <div className="relative w-36 h-36 bg-white rounded">
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 bg-white rounded">
                 <Image
                   src="/images/usdt-qr.jpg"
                   alt="QR USDT TRC20"
@@ -95,13 +95,13 @@ export function PaymentModal({
             </div>
 
             {/* USDT Address with copy */}
-            <div className="flex items-center gap-2 bg-muted/30 rounded px-3 py-2">
-              <code className="flex-1 text-[10px] text-foreground/80 break-all font-mono">
+            <div className="flex items-center gap-2 bg-muted/30 rounded px-2.5 sm:px-3 py-2">
+              <code className="flex-1 text-[9px] sm:text-[10px] text-foreground/80 break-all font-mono leading-relaxed">
                 {USDT_ADDRESS}
               </code>
               <button
                 onClick={handleCopyUsdt}
-                className="shrink-0 p-1.5 hover:bg-muted rounded transition-colors"
+                className="shrink-0 p-1.5 sm:p-2 hover:bg-muted rounded transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
               >
                 {copiedUsdt ? (
                   <Check className="h-3.5 w-3.5 text-emerald-500" />
@@ -112,17 +112,17 @@ export function PaymentModal({
             </div>
 
             {/* Discrete note */}
-            <p className="text-[10px] text-muted-foreground/60 text-center">
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground/60 text-center">
               Solo USDT por red TRON (TRC20)
             </p>
           </TabsContent>
 
           {/* PayPal Tab */}
-          <TabsContent value="paypal" className="mt-0 p-5">
-            <div className="flex items-center gap-3">
+          <TabsContent value="paypal" className="mt-0 p-4 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* PayPal Logo */}
               <svg
-                className="w-8 h-8 shrink-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 shrink-0"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -142,13 +142,13 @@ export function PaymentModal({
               </svg>
 
               {/* Email with copy */}
-              <div className="flex-1 flex items-center gap-2 bg-muted/30 rounded px-3 py-2">
-                <span className="flex-1 text-xs text-foreground/80 font-mono">
+              <div className="flex-1 flex items-center gap-2 bg-muted/30 rounded px-2.5 sm:px-3 py-2">
+                <span className="flex-1 text-[11px] sm:text-xs text-foreground/80 font-mono truncate">
                   {PAYPAL_EMAIL}
                 </span>
                 <button
                   onClick={handleCopyPaypal}
-                  className="shrink-0 p-1.5 hover:bg-muted rounded transition-colors"
+                  className="shrink-0 p-1.5 sm:p-2 hover:bg-muted rounded transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
                 >
                   {copiedPaypal ? (
                     <Check className="h-3.5 w-3.5 text-emerald-500" />
@@ -162,11 +162,11 @@ export function PaymentModal({
         </Tabs>
 
         {/* Close Button */}
-        <div className="px-5 pb-5">
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5">
           <Button
             onClick={() => onOpenChange(false)}
             variant="outline"
-            className="w-full bg-transparent"
+            className="w-full h-11 sm:h-10 text-xs sm:text-sm bg-transparent"
           >
             Cerrar
           </Button>
