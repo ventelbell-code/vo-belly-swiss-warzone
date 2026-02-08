@@ -1,15 +1,18 @@
-import "./globals.css"
+import "./globals.css";
+
+export const metadata = {
+  title: "BellySwiss Warzone",
+  description: "Dashboard",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="es">
-      <body style={{ margin: 0 }}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
-  )
+  );
 }
