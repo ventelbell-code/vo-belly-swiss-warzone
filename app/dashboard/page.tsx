@@ -188,8 +188,8 @@ export default function DashboardClientePage() {
 
         {/* Dashboard Content */}
         <div className="flex-1 p-3 sm:p-4 lg:p-6 pb-20 lg:pb-6 space-y-3 sm:space-y-4 overflow-auto">
-          {/* Bot Connection Status - Shows real data from MT5 */}
-          <BotConnectionStatus />
+          {/* Bot Connection Status - Reads balance, equity, last_seen from bot_status */}
+          <BotConnectionStatus accountId={tradingData.accountId || undefined} />
 
           {/* Aviso de Estado del Sistema - Compacto */}
           {isLoaded && (

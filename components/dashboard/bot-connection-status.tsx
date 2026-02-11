@@ -13,15 +13,28 @@ import {
   Clock
 } from "lucide-react"
 
-interface TradeData {
-  id: string
+/** Bot status row from Supabase bot_status table (heartbeat from MT5 EA). */
+interface BotStatusData {
   account_id: string
-  broker: string
-  balance: number
-  equity: number
-  profit: number
-  updated_at: string
+  broker: string | null
+  balance: number | null
+  equity: number | null
+  last_seen: string
   created_at: string
+  updated_at: string
+}
+
+/** Latest trade profit for display (from trades table). */
+interface LatestTradeProfit {
+  profit: number
+}
+
+/** Bot is "connected" when we have any bot_status row (data received). Staleness is shown via "Última actualización". */
+
+function toNumber(value: unknown): number {
+  if (value == null || value === "") return 0
+  const n = Number(value)
+  return Number.isFinite(n) ? n : 0
 }
 
 interface BotConnectionStatusProps {
@@ -29,47 +42,63 @@ interface BotConnectionStatusProps {
 }
 
 export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
-  const [tradeData, setTradeData] = useState<TradeData | null>(null)
+  const [botStatus, setBotStatus] = useState<BotStatusData | null>(null)
+  const [latestProfit, setLatestProfit] = useState<number>(0)
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [lastCheck, setLastCheck] = useState<Date>(new Date())
 
   const supabase = createClient()
 
-  const fetchTradeData = async () => {
+  const fetchBotStatus = async () => {
     try {
-      let query = supabase
-        .from("trades")
-        .select("*")
-        .order("updated_at", { ascending: false })
+      // 1) Read from bot_status (balance, equity, last_seen, account_id)
+      let statusQuery = supabase
+        .from("bot_status")
+        .select("account_id, broker, balance, equity, last_seen, created_at, updated_at")
+        .order("last_seen", { ascending: false })
         .limit(1)
 
       if (accountId) {
-        query = query.eq("account_id", accountId)
+        statusQuery = statusQuery.eq("account_id", accountId)
       }
 
-      const { data, error } = await query.single()
+      const { data: statusData, error: statusError } = await statusQuery.maybeSingle()
 
-      if (error && error.code !== "PGRST116") {
-        console.error("Error fetching trade data:", error)
+      if (statusError) {
+        console.error("Error fetching bot_status:", statusError)
+        setBotStatus(null)
         setIsConnected(false)
-        setTradeData(null)
-      } else if (data) {
-        setTradeData(data)
-        
-        // Check if data is recent (within 120 seconds)
-        const updatedAt = new Date(data.updated_at)
-        const now = new Date()
-        const diffSeconds = (now.getTime() - updatedAt.getTime()) / 1000
-        setIsConnected(diffSeconds < 120)
+        setLastCheck(new Date())
+        return
+      }
+
+      if (statusData) {
+        setBotStatus(statusData as BotStatusData)
+        setIsConnected(true)
       } else {
+        setBotStatus(null)
         setIsConnected(false)
-        setTradeData(null)
+      }
+
+      // 2) Optional: get latest trade profit for this account (from trades)
+      const accId = statusData?.account_id ?? accountId
+      if (accId) {
+        const { data: tradeRow } = await supabase
+          .from("trades")
+          .select("profit")
+          .eq("account_id", accId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        setLatestProfit(toNumber((tradeRow as LatestTradeProfit | null)?.profit))
+      } else {
+        setLatestProfit(0)
       }
 
       setLastCheck(new Date())
     } catch (err) {
-      console.error("Error:", err)
+      console.error("Error fetching bot status:", err)
       setIsConnected(false)
     } finally {
       setIsLoading(false)
@@ -77,26 +106,24 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
   }
 
   useEffect(() => {
-    fetchTradeData()
+    fetchBotStatus()
 
-    // Poll every 30 seconds
-    const interval = setInterval(fetchTradeData, 30000)
+    const interval = setInterval(fetchBotStatus, 30000)
 
-    // Subscribe to realtime updates
     const channel = supabase
-      .channel("trades-realtime")
+      .channel("bot_status-realtime")
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
-          table: "trades",
+          table: "bot_status",
         },
         (payload) => {
           if (payload.new) {
-            const newData = payload.new as TradeData
-            if (!accountId || newData.account_id === accountId) {
-              setTradeData(newData)
+            const row = payload.new as BotStatusData
+            if (!accountId || row.account_id === accountId) {
+              setBotStatus(row)
               setIsConnected(true)
               setLastCheck(new Date())
             }
@@ -118,6 +145,10 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
       minimumFractionDigits: 2,
     }).format(value)
   }
+
+  const balance = toNumber(botStatus?.balance)
+  const equity = toNumber(botStatus?.equity)
+  const lastSeenAt = botStatus?.last_seen ?? botStatus?.updated_at
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString)
@@ -169,27 +200,27 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
               </p>
               <p className="text-[10px] text-muted-foreground">
                 {isConnected 
-                  ? "Recibiendo datos en tiempo real desde MT5"
-                  : "Sin datos recientes del bot MT5"
+                  ? "Datos recibidos desde el bot MT5"
+                  : "Sin datos del bot MT5"
                 }
               </p>
             </div>
           </div>
-          {tradeData && (
+          {botStatus && (
             <div className="text-right">
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60">
                 Broker
               </p>
               <p className="text-xs font-medium text-foreground">
-                {tradeData.broker || "Deriv"}
+                {botStatus.broker || "Deriv"}
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Trade Data */}
-      {tradeData ? (
+      {/* Bot status: balance, equity, last_seen, account_id */}
+      {botStatus ? (
         <CardContent className="p-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {/* Balance */}
@@ -201,7 +232,7 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
                 </p>
               </div>
               <p className="text-lg font-semibold text-foreground">
-                {formatCurrency(tradeData.balance)}
+                {formatCurrency(balance)}
               </p>
             </div>
 
@@ -214,11 +245,11 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
                 </p>
               </div>
               <p className="text-lg font-semibold text-foreground">
-                {formatCurrency(tradeData.equity)}
+                {formatCurrency(equity)}
               </p>
             </div>
 
-            {/* Profit */}
+            {/* Profit (from latest trade) */}
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
                 <TrendingUp className="w-3.5 h-3.5 text-muted-foreground/60" />
@@ -227,13 +258,13 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
                 </p>
               </div>
               <p className={`text-lg font-semibold ${
-                tradeData.profit >= 0 ? "text-emerald-400" : "text-red-400"
+                latestProfit >= 0 ? "text-emerald-400" : "text-red-400"
               }`}>
-                {tradeData.profit >= 0 ? "+" : ""}{formatCurrency(tradeData.profit)}
+                {latestProfit >= 0 ? "+" : ""}{formatCurrency(latestProfit)}
               </p>
             </div>
 
-            {/* Last Update */}
+            {/* Last Update (last_seen from bot_status) */}
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
@@ -242,7 +273,7 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
                 </p>
               </div>
               <p className="text-lg font-semibold text-foreground">
-                {formatTimeAgo(tradeData.updated_at)}
+                {lastSeenAt ? formatTimeAgo(lastSeenAt) : "—"}
               </p>
             </div>
           </div>
@@ -251,10 +282,10 @@ export function BotConnectionStatus({ accountId }: BotConnectionStatusProps) {
           <div className="mt-4 pt-4 border-t border-border/30">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-muted-foreground">
-                Account ID: <span className="font-mono text-foreground">{tradeData.account_id}</span>
+                Account ID: <span className="font-mono text-foreground">{botStatus.account_id}</span>
               </p>
               <button 
-                onClick={fetchTradeData}
+                onClick={fetchBotStatus}
                 className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
               >
                 <RefreshCw className="w-3 h-3" />
