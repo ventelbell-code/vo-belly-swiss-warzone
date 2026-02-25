@@ -3,56 +3,106 @@ export default function LandingPage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #0f172a, #020617)",
+        background:
+          "radial-gradient(circle at 20% 20%, #1f2937 0%, #0b1120 40%, #05070f 100%)",
         color: "white",
-        padding: "80px 24px",
         fontFamily: "system-ui, sans-serif",
+        position: "relative",
+        overflow: "hidden"
       }}
     >
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 48, marginBottom: 20 }}>
-          Belly Swiss Warzone
+      {/* LOGO SUPERIOR IZQUIERDO */}
+      <div
+        style={{
+          position: "absolute",
+          top: 30,
+          left: 50,
+          fontWeight: 800,
+          fontSize: 18,
+          letterSpacing: 3
+        }}
+      >
+        <span style={{ color: "#ef4444" }}>BELLY</span>
+        <span style={{ color: "#e5e7eb" }}> WARZONE</span>
+      </div>
+
+      {/* CONTENIDO CENTRAL */}
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "40px"
+        }}
+      >
+        {/* TITULO METALICO GRANDE */}
+        <h1
+          style={{
+            fontSize: "100px",
+            fontWeight: 900,
+            background:
+              "linear-gradient(90deg,#9ca3af,#f9fafb,#9ca3af,#6b7280)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            letterSpacing: 4,
+            margin: 0
+          }}
+        >
+          Warzone
         </h1>
 
-        <p style={{ fontSize: 20, opacity: 0.85, marginBottom: 40 }}>
-          Infraestructura institucional de trading automatizado.
-          Precisión suiza. Ejecución real. Sin humo.
+        {/* SUBTITULO */}
+        <h2
+          style={{
+            fontSize: "40px",
+            fontWeight: 600,
+            marginTop: 10,
+            marginBottom: 30,
+            color: "#d1d5db"
+          }}
+        >
+          Trading Algorítmico Institucional
+        </h2>
+
+        {/* TEXTO PERSUASIVO PROFESIONAL */}
+        <p
+          style={{
+            maxWidth: 750,
+            fontSize: 20,
+            lineHeight: 1.7,
+            opacity: 0.85,
+            marginBottom: 60
+          }}
+        >
+          Infraestructura algorítmica diseñada bajo estándares de ejecución
+          institucional. Optimización de capital, precisión matemática y
+          arquitectura construida para rendimiento constante. No es una
+          plataforma pública. Es un entorno privado desarrollado para quienes
+          operan con visión profesional.
         </p>
 
-        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-          <a
-            href="/login"
-            style={{
-              background: "#22c55e",
-              color: "#022c22",
-              padding: "14px 28px",
-              borderRadius: 10,
-              fontWeight: 600,
-              textDecoration: "none",
-            }}
-          >
-            Acceder
-          </a>
-
-          <a
-            href="#"
-            style={{
-              border: "1px solid rgba(255,255,255,0.3)",
-              color: "white",
-              padding: "14px 28px",
-              borderRadius: 10,
-              fontWeight: 500,
-              textDecoration: "none",
-            }}
-          >
-            Ver documentación
-          </a>
-        </div>
-
-        <div style={{ marginTop: 80, opacity: 0.5, fontSize: 14 }}>
-          © {new Date().getFullYear()} Belly Swiss · Institutional Systems
-        </div>
+        {/* BOTON INSTITUCIONAL */}
+        <a
+          href="/login"
+          style={{
+            padding: "20px 50px",
+            fontSize: 18,
+            fontWeight: 600,
+            borderRadius: 14,
+            background:
+              "linear-gradient(90deg,#1e3a8a,#2563eb,#1e3a8a)",
+            color: "white",
+            textDecoration: "none",
+            boxShadow: "0 15px 40px rgba(37,99,235,0.35)",
+            transition: "all 0.3s ease"
+          }}
+        >
+          Acceder a la zona
+        </a>
       </div>
     </main>
-  )
+  );
 }
