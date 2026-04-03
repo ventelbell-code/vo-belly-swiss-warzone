@@ -1,9 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Bot, CreditCard, ShieldCheck } from "lucide-react"
+import { CreditCard, LockKeyhole, Radio } from "lucide-react"
 
 import { AnimatedLogo } from "@/components/animated-logo"
 import { Button } from "@/components/ui/button"
@@ -12,52 +12,64 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 
-const portalBullets = [
+const registrationHighlights = [
   {
-    icon: ShieldCheck,
-    title: "Licencia visible",
-    text: "Estado, expiracion y plan contratados en un solo lugar.",
+    icon: LockKeyhole,
+    title: "Cuenta principal",
+    text: "Tu acceso queda listo para licencias, renovaciones y control de membresia.",
   },
   {
-    icon: Bot,
-    title: "Bot conectado",
-    text: "Heartbeat, actividad y telemetria recibidos desde MT5.",
+    icon: Radio,
+    title: "Portal conectado",
+    text: "La web queda preparada para mostrar sincronizacion, metricas y actividad del bot.",
   },
   {
     icon: CreditCard,
-    title: "Membresia lista",
-    text: "Renovaciones, historial y billing preparados para crecer.",
+    title: "Billing visible",
+    text: "Pagos, vencimiento y periodos de acceso aparecen en una sola experiencia.",
   },
 ]
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
+  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setError("")
     setIsLoading(true)
+    setError("")
+    setMessage("")
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
     })
 
-    if (signInError) {
-      setError(signInError.message)
+    if (signUpError) {
+      setError(signUpError.message)
       setIsLoading(false)
       return
     }
 
-    const nextPath = searchParams.get("next") || "/dashboard"
-    router.push(nextPath)
-    router.refresh()
+    if (data.session) {
+      router.push("/dashboard")
+      router.refresh()
+      return
+    }
+
+    setMessage("Cuenta creada. Revisa tu correo para confirmar el acceso antes de entrar.")
+    setIsLoading(false)
   }
 
   return (
@@ -70,19 +82,19 @@ export default function LoginPage() {
           <div className="space-y-5">
             <AnimatedLogo size="lg" className="w-52 sm:w-72" />
             <div className="space-y-3">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground/70">Acceso SaaS</p>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground/70">Nuevo acceso</p>
               <h1 className="font-display max-w-xl text-4xl leading-tight text-foreground sm:text-5xl">
-                Entra al portal donde vive la licencia, el bot y el rendimiento
+                Crea tu cuenta para entrar al sistema nuevo de licencias
               </h1>
               <p className="max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
-                Este acceso ya no es solo una pantalla de login. Es la entrada al sistema nuevo: membresia,
-                telemetria del EA y experiencia cliente real.
+                Este registro es la puerta al producto visible: portal cliente, licencia online, telemetria del bot y
+                experiencia comercial unificada.
               </p>
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            {portalBullets.map((item) => (
+            {registrationHighlights.map((item) => (
               <Card key={item.title} className="border-white/8 bg-white/[0.045] backdrop-blur-xl">
                 <CardContent className="space-y-3 p-5">
                   <item.icon className="size-5 text-chart-2" />
@@ -99,14 +111,28 @@ export default function LoginPage() {
         <Card className="border-white/[0.08] bg-card/75 shadow-[0_32px_90px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl">
           <CardContent className="space-y-8 p-6 sm:p-8">
             <div className="space-y-2">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground/70">Portal del cliente</p>
-              <h2 className="font-display text-3xl text-foreground">Inicia sesion</h2>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground/70">Registro cliente</p>
+              <h2 className="font-display text-3xl text-foreground">Crear cuenta</h2>
               <p className="text-sm text-muted-foreground">
-                Accede a tu licencia, a la conexion MT5 y al panel operativo desde la cuenta principal.
+                Registra el acceso principal para activar planes, ver el dashboard y conectar el bot al portal.
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80">
+                  Nombre
+                </Label>
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  placeholder="Tu nombre o tu marca"
+                  className="h-12 border-white/[0.08] bg-white/[0.03]"
+                  required
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80">
                   Correo electronico
@@ -117,8 +143,8 @@ export default function LoginPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="cliente@bellyswiss.com"
-                  autoComplete="email"
                   className="h-12 border-white/[0.08] bg-white/[0.03]"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -132,9 +158,10 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Tu contrasena"
-                  autoComplete="current-password"
+                  placeholder="Minimo 6 caracteres"
                   className="h-12 border-white/[0.08] bg-white/[0.03]"
+                  autoComplete="new-password"
+                  minLength={6}
                   required
                 />
               </div>
@@ -145,15 +172,21 @@ export default function LoginPage() {
                 </div>
               ) : null}
 
+              {message ? (
+                <div className="rounded-md border border-[oklch(0.35_0.06_145)] bg-[oklch(0.14_0.03_145)] px-3 py-2 text-sm text-[oklch(0.82_0.06_145)]">
+                  {message}
+                </div>
+              ) : null}
+
               <Button type="submit" className="h-12 w-full uppercase tracking-[0.18em]" disabled={isLoading}>
-                {isLoading ? "Entrando..." : "Entrar al portal"}
+                {isLoading ? "Creando..." : "Crear acceso"}
               </Button>
             </form>
 
             <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-              <span className="text-muted-foreground">Aun no tienes acceso?</span>
+              <span className="text-muted-foreground">Ya tienes cuenta?</span>
               <Button asChild variant="link" className="px-0">
-                <Link href="/register">Crear cuenta</Link>
+                <Link href="/login">Iniciar sesion</Link>
               </Button>
             </div>
           </CardContent>
