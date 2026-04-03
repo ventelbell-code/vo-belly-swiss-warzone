@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Activity, Bot, CreditCard, KeyRound, LineChart, LogOut, Radio, ShieldCheck, Sparkles, Wallet } from "lucide-react"
+import { Activity, Bot, CreditCard, KeyRound, LineChart, LogOut, Radio, ShieldCheck, Sparkles, Wallet, type LucideIcon } from "lucide-react"
 
 import { AnimatedLogo } from "@/components/animated-logo"
 import { Button } from "@/components/ui/button"

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Bot, CreditCard, ShieldCheck } from "lucide-react"
 
@@ -32,7 +32,6 @@ const portalBullets = [
 
 export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -55,8 +54,7 @@ export default function LoginPage() {
       return
     }
 
-    const nextPath = searchParams.get("next") || "/dashboard"
-    router.push(nextPath)
+    router.push("/dashboard")
     router.refresh()
   }
 
