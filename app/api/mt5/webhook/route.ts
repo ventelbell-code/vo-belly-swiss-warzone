@@ -1,129 +1,168 @@
-import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from "next/server"
 
-export async function POST(req: Request) {
+import { buildEventHash, validateBotLicense } from "@/lib/saas/bot"
+import { createAdminClient } from "@/lib/supabase/admin"
+
+export const runtime = "nodejs"
+
+function resolveIsoTime(body: Record<string, unknown>) {
+  if (typeof body.event_time === "string" && body.event_time.trim()) {
+    return new Date(body.event_time).toISOString()
+  }
+
+  if (typeof body.event_time_unix === "number" && Number.isFinite(body.event_time_unix)) {
+    return new Date(body.event_time_unix * 1000).toISOString()
+  }
+
+  if (typeof body.server_time_unix === "number" && Number.isFinite(body.server_time_unix)) {
+    return new Date(body.server_time_unix * 1000).toISOString()
+  }
+
+  return new Date().toISOString()
+}
+
+function asNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null
+}
+
+function asString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null
+}
+
+export async function POST(request: Request) {
   try {
-    // 1️⃣ Seguridad: validar token del bot MT5
-    const authHeader = req.headers.get('authorization');
-    const expectedToken = process.env.MT5_WEBHOOK_SECRET;
+    const body = await request.json()
+    const validation = await validateBotLicense(body, { allowBind: true })
 
-    if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!validation.valid || !validation.context) {
+      return NextResponse.json(
+        {
+          success: false,
+          ...validation.response,
+        },
+        { status: 200 },
+      )
     }
 
-    // 2️⃣ Variables de entorno
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase = createAdminClient()
+    const receivedAt = new Date().toISOString()
+    const event = asString(body.event)
 
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase credentials');
-      return Response.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
-    }
-
-    // 3️⃣ Inicializar Supabase (SIEMPRE dentro del handler)
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // 4️⃣ Leer body
-    const body = await req.json();
-    console.log('📥 Webhook recibido:', body);
-
-    const {
-      event,
-      account_id,
-      broker,
-      balance,
-      equity,
-      ticket,
-      symbol,
-      type,
-      lot,
-      profit
-    } = body;
-
-    // =========================
-    // 🟢 HEARTBEAT / ESTADO BOT
-    // =========================
-    if (event === 'heartbeat') {
-      if (!account_id) {
-        return Response.json(
-          { error: 'Missing account_id' },
-          { status: 400 }
-        );
-      }
-
-      const { error } = await supabase
-        .from('bot_status')
-        .upsert({
-          account_id,
-          broker: broker || 'Unknown',
-          balance: balance ?? null,
-          equity: equity ?? null,
-          last_seen: new Date().toISOString()
-        }, {
-          onConflict: 'account_id'
-        });
+    if (event === "snapshot") {
+      const { error } = await supabase.from("bot_snapshots").insert({
+        client_id: validation.context.clientId,
+        license_id: validation.context.licenseId,
+        binding_id: validation.context.bindingId,
+        account_login: validation.context.binding?.account_login ?? String(body.account_login ?? ""),
+        account_server: validation.context.binding?.account_server ?? String(body.account_server ?? ""),
+        balance: asNumber(body.balance),
+        equity: asNumber(body.equity),
+        floating_profit: asNumber(body.floating_profit),
+        realized_profit: asNumber(body.realized_profit),
+        open_positions: typeof body.open_positions === "number" ? body.open_positions : null,
+        currency: asString(body.currency),
+        payload: body.payload && typeof body.payload === "object" ? body.payload : {},
+        received_at: receivedAt,
+      })
 
       if (error) {
-        console.error('Supabase heartbeat error:', error);
-        return Response.json(
-          { error: error.message },
-          { status: 500 }
-        );
+        throw new Error(error.message)
       }
 
-      return Response.json({ success: true, type: 'heartbeat' });
+      return NextResponse.json({
+        success: true,
+        event: "snapshot",
+        ...validation.response,
+      })
     }
 
-    // =========================
-    // 🔵 TRADE REAL
-    // =========================
-    if (event === 'trade') {
-      if (!account_id || !ticket || !symbol) {
-        return Response.json(
-          { error: 'Missing required trade fields' },
-          { status: 400 }
-        );
+    if (event === "trade_event") {
+      const eventType = asString(body.event_type)
+      const externalTicket = asString(body.external_ticket)
+      const symbol = asString(body.symbol)
+
+      if (!eventType || !externalTicket || !symbol) {
+        return NextResponse.json(
+          {
+            success: false,
+            valid: true,
+            can_trade: validation.canTrade,
+            status: "invalid_request",
+            message: "Missing event_type, external_ticket or symbol.",
+          },
+          { status: 400 },
+        )
       }
 
-      const { error } = await supabase
-        .from('trades')
-        .insert({
-          account_id,
-          ticket,
+      const eventTime = resolveIsoTime(body)
+      const eventHash = asString(body.event_hash) || buildEventHash({
+        licenseId: validation.context.licenseId,
+        eventType,
+        externalTicket,
+        symbol,
+        eventTime,
+        profit: asNumber(body.profit),
+        volume: asNumber(body.volume),
+      })
+
+      const { error } = await supabase.from("bot_trade_events").upsert(
+        {
+          client_id: validation.context.clientId,
+          license_id: validation.context.licenseId,
+          binding_id: validation.context.bindingId,
+          event_hash: eventHash,
+          event_type: eventType,
+          external_ticket: externalTicket,
           symbol,
-          type,
-          lot,
-          profit,
-          event,
-          created_at: new Date().toISOString()
-        });
+          direction: asString(body.direction),
+          volume: asNumber(body.volume),
+          entry_price: asNumber(body.entry_price),
+          close_price: asNumber(body.close_price),
+          profit: asNumber(body.profit),
+          swap: asNumber(body.swap),
+          commission: asNumber(body.commission),
+          event_time: eventTime,
+          payload: body.payload && typeof body.payload === "object" ? body.payload : {},
+          received_at: receivedAt,
+        },
+        {
+          onConflict: "event_hash",
+        },
+      )
 
       if (error) {
-        console.error('Supabase trade error:', error);
-        return Response.json(
-          { error: error.message },
-          { status: 500 }
-        );
+        throw new Error(error.message)
       }
 
-      return Response.json({ success: true, type: 'trade' });
+      return NextResponse.json({
+        success: true,
+        event: "trade_event",
+        event_hash: eventHash,
+        ...validation.response,
+      })
     }
 
-    // =========================
-    // ❌ EVENTO DESCONOCIDO
-    // =========================
-    return Response.json(
-      { error: 'Unknown event type' },
-      { status: 400 }
-    );
-
-  } catch (err: any) {
-    console.error('Webhook error:', err);
-    return Response.json(
-      { error: err.message || 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json(
+      {
+        success: false,
+        valid: true,
+        can_trade: validation.canTrade,
+        status: "unsupported_event",
+        message: "Supported events: snapshot, trade_event.",
+      },
+      { status: 400 },
+    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Webhook failed."
+    return NextResponse.json(
+      {
+        success: false,
+        valid: false,
+        can_trade: false,
+        status: "server_error",
+        message,
+      },
+      { status: 500 },
+    )
   }
 }
